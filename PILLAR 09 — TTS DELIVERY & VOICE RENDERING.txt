@@ -1,0 +1,1862 @@
+Exactly. **Pillar 09 is where the behavioral system finally meets the actual voice engine.** The key is to prevent the TTS provider from becoming the “personality.” JARVIS decides *how he should speak*; the renderer simply executes that decision.
+
+Streaming TTS is particularly important here: recent work is explicitly targeting incremental synthesis, mid-utterance interruption, and maintaining continuity across streamed speech rather than waiting for an entire response. ([arXiv][1]) SSML-capable systems can also expose pauses, rate, pitch, volume, pronunciation, and timing marks, which gives us useful provider-adapter primitives. ([Google Cloud Documentation][2])
+
+# JARVIS VOICE BEHAVIOR
+
+## PILLAR 09 — TTS DELIVERY & VOICE RENDERING
+
+### 1. PURPOSE
+
+Define how JARVIS converts an approved speech performance into actual audio.
+
+This layer is responsible for:
+
+* voice selection
+* voice identity
+* TTS provider abstraction
+* audio generation
+* streaming
+* chunk management
+* playback
+* pronunciation
+* SSML or provider-specific controls
+* audio buffering
+* interruption-safe playback
+* cancellation
+* speech synchronization
+* transcript synchronization
+* sphere synchronization
+* voice continuity
+* provider failure handling
+
+This layer must **not** decide JARVIS's personality.
+
+---
+
+# 2. CORE PRINCIPLE
+
+The architecture is:
+
+```text
+BEHAVIOR
+    ↓
+CONTEXT
+    ↓
+INTENTION
+    ↓
+EMOTION
+    ↓
+WORDING
+    ↓
+RHYTHM
+    ↓
+TIMING
+    ↓
+PROSODY
+    ↓
+TTS DELIVERY
+    ↓
+AUDIO
+```
+
+Pillar 09 receives a speech directive.
+
+It does not reinvent it.
+
+> **JARVIS decides how he wants to speak. The TTS engine renders it.**
+
+---
+
+# 3. TTS IS A RENDERER
+
+Do not treat TTS as the intelligence layer.
+
+Bad architecture:
+
+```text
+LLM
+ ↓
+raw text
+ ↓
+TTS
+ ↓
+"whatever personality the voice produces"
+```
+
+Correct architecture:
+
+```text
+JARVIS BRAIN
+ ↓
+SPEECH DIRECTOR
+ ↓
+PROSODY DIRECTIVE
+ ↓
+TTS ADAPTER
+ ↓
+VOICE ENGINE
+ ↓
+AUDIO
+```
+
+The behavioral system owns the communicative intent.
+
+The TTS engine owns synthesis.
+
+---
+
+# 4. VOICE IDENTITY
+
+JARVIS should have one persistent primary voice identity.
+
+Initial target:
+
+```text
+voice_identity:
+    language: English
+    accent_target: British
+    gender_presentation: male
+    identity: stable
+```
+
+The exact provider voice is configurable.
+
+Do not hard-code the behavioral architecture around one provider.
+
+---
+
+# 5. SAME JARVIS, DIFFERENT DELIVERY
+
+The voice must remain recognizable across:
+
+* calm conversation
+* excitement
+* business analysis
+* technical explanation
+* humor
+* serious discussion
+* urgency
+* emotional support
+* disagreement
+* correction
+* storytelling
+
+The delivery changes.
+
+The identity does not.
+
+---
+
+# 6. VOICE IDENTITY CONTRACT
+
+The selected voice should remain as stable as technically possible across:
+
+```text
+speaker identity
+accent
+timbre
+gender presentation
+pronunciation
+baseline pitch
+baseline vocal character
+```
+
+Avoid unnecessary voice switching.
+
+If multiple voices are eventually supported, switching should be an explicit system decision, not accidental provider behavior.
+
+---
+
+# 7. PROVIDER ABSTRACTION
+
+JARVIS must not directly depend on one TTS vendor.
+
+Use:
+
+```text
+JARVIS
+  ↓
+TTS INTERFACE
+  ↓
+PROVIDER ADAPTER
+  ↓
+TTS PROVIDER
+```
+
+Example:
+
+```text
+TTSProvider
+├── synthesize()
+├── stream()
+├── cancel()
+├── getCapabilities()
+├── normalizeProsody()
+└── normalizeAudio()
+```
+
+Possible implementations:
+
+```text
+ElevenLabsAdapter
+GoogleTTSAdapter
+AzureTTSAdapter
+LocalTTSAdapter
+FutureProviderAdapter
+```
+
+The behavioral layer should not know which provider is underneath.
+
+---
+
+# 8. PROVIDER CAPABILITY DISCOVERY
+
+Every provider adapter should expose capabilities.
+
+Example:
+
+```text
+CAPABILITIES
+
+streaming:
+    true
+
+pitch:
+    supported
+
+rate:
+    supported
+
+volume:
+    supported
+
+pause:
+    supported
+
+word_timestamps:
+    supported
+
+phoneme_control:
+    partial
+
+emotion_control:
+    supported
+
+voice_cloning:
+    supported
+```
+
+The Speech Director can then determine what can actually be rendered.
+
+---
+
+# 9. NEVER FAKE CONTROL
+
+If the provider cannot control pitch:
+
+Do not pretend that:
+
+```text
+pitch = -4%
+```
+
+was actually applied.
+
+Instead:
+
+```text
+requested:
+    pitch = -4%
+
+provider:
+    unsupported
+
+fallback:
+    closest_supported_rendering
+```
+
+The system should know what it requested versus what the renderer actually delivered.
+
+---
+
+# 10. TTS REQUEST OBJECT
+
+Every speech request should have a structured representation.
+
+Example:
+
+```text
+TTS_REQUEST
+
+request_id:
+    speech_8f92
+
+conversation_id:
+    conversation_17
+
+voice:
+    jarvis_primary
+
+segments:
+    [...]
+
+prosody:
+    [...]
+
+priority:
+    normal
+
+interruptible:
+    true
+
+stream:
+    true
+
+language:
+    en-GB
+```
+
+---
+
+# 11. SEGMENT-LEVEL SYNTHESIS
+
+Do not always send an entire answer as one giant TTS request.
+
+Example:
+
+```text
+"Yeah."
+"But here's the problem."
+"The economics don't work yet."
+```
+
+can become separate speech segments.
+
+This enables:
+
+* faster first audio
+* better interruption
+* different prosody
+* precise transcript synchronization
+* better recovery
+
+---
+
+# 12. DO NOT FRAGMENT TOO AGGRESSIVELY
+
+Segmentation must preserve natural speech.
+
+Bad:
+
+```text
+"Yeah."
+"but."
+"here's."
+"the."
+"problem."
+```
+
+Good:
+
+```text
+"Yeah, but here's the problem."
+```
+
+The segmentation produced by Pillar 06 remains authoritative.
+
+TTS should not randomly rewrite the segmentation.
+
+---
+
+# 13. STREAMING
+
+Whenever supported, JARVIS should prefer streaming TTS for conversational interaction.
+
+Pipeline:
+
+```text
+LLM STREAM
+    ↓
+STABLE SPEECH SEGMENT
+    ↓
+TTS STREAM
+    ↓
+AUDIO CHUNK
+    ↓
+PLAYBACK
+```
+
+This allows speech to begin before the complete response is generated.
+
+Streaming TTS research specifically targets this reduction in first-audio latency. ([arXiv][3])
+
+---
+
+# 14. STREAMING DOES NOT MEAN SPEAK EVERYTHING IMMEDIATELY
+
+The system must distinguish:
+
+```text
+generated text
+```
+
+from:
+
+```text
+speech-safe text
+```
+
+The LLM may currently be generating:
+
+> “I think the best option is—”
+
+Do not necessarily speak that immediately if the next tokens could change the sentence.
+
+Use a:
+
+```text
+SPEECH COMMITMENT GATE
+```
+
+---
+
+# 15. SPEECH COMMITMENT GATE
+
+A segment becomes speakable when:
+
+```text
+meaning sufficiently stable
++
+syntactic boundary sufficiently stable
++
+prosody can be determined
++
+no obvious continuation risk
+```
+
+Then:
+
+```text
+COMMIT
+ ↓
+TTS
+```
+
+This prevents awkward speech caused by speaking unstable partial text.
+
+---
+
+# 16. STREAMING BUFFER
+
+Use a small adaptive buffer.
+
+Conceptually:
+
+```text
+LLM
+ ↓
+TEXT BUFFER
+ ↓
+SEGMENTER
+ ↓
+SPEECH COMMITMENT
+ ↓
+TTS
+ ↓
+AUDIO BUFFER
+ ↓
+PLAYER
+```
+
+The buffer should be small enough for responsiveness but large enough to avoid frequent stalls.
+
+---
+
+# 17. FIRST-AUDIO PRIORITY
+
+For conversational speech, measure:
+
+```text
+user_turn_end
+        ↓
+first audible JARVIS audio
+```
+
+not merely:
+
+```text
+request sent
+        ↓
+HTTP response received
+```
+
+The user experiences **audible speech**, not network packets.
+
+Streaming research emphasizes first-audio latency as a central conversational metric. ([arXiv][3])
+
+---
+
+# 18. AUDIO BUFFERING
+
+Playback should use a controlled buffer.
+
+Too little:
+
+```text
+audio
+silence
+audio
+silence
+```
+
+Too much:
+
+```text
+large delay
+↓
+slow interruption
+```
+
+Target:
+
+> enough buffering to keep speech continuous, but not enough to make interruption feel delayed.
+
+---
+
+# 19. INTERRUPTION
+
+Interruption is a first-class TTS operation.
+
+When the user speaks:
+
+```text
+USER SPEECH DETECTED
+        ↓
+INTERRUPTION EVENT
+        ↓
+CANCEL TTS
+        ↓
+STOP AUDIO
+        ↓
+FLUSH PLAYBACK BUFFER
+        ↓
+PRESERVE CONVERSATION STATE
+        ↓
+LISTEN
+```
+
+Do not wait for the current sentence to finish.
+
+---
+
+# 20. HARD STOP
+
+The audio player must be able to stop independently of the TTS request.
+
+This distinction matters:
+
+```text
+cancel_generation()
+```
+
+and:
+
+```text
+stop_playback()
+```
+
+are separate operations.
+
+Both may be required.
+
+---
+
+# 21. WHY BOTH MATTER
+
+Suppose the provider has already generated:
+
+```text
+500ms of audio
+```
+
+but another:
+
+```text
+2 seconds
+```
+
+remain buffered.
+
+Cancelling generation alone may not stop the buffered audio.
+
+Therefore:
+
+```text
+INTERRUPT
+→ cancel synthesis
+→ stop playback
+→ discard pending chunks
+```
+
+---
+
+# 22. INTERRUPTION TOKEN
+
+Every audio stream should have a generation identity.
+
+Example:
+
+```text
+generation_id:
+    gen_042
+```
+
+If the user interrupts:
+
+```text
+gen_042
+status = cancelled
+```
+
+Any late audio belonging to `gen_042` must be discarded.
+
+This prevents stale speech from appearing after the conversation has already moved on.
+
+---
+
+# 23. INTERRUPT RACE CONDITION
+
+The system must handle:
+
+```text
+TTS chunk arrives
++
+user interrupts
++
+audio callback fires
+```
+
+Correct behavior:
+
+```text
+if chunk.generation_id !== active_generation_id:
+    discard
+```
+
+Never play stale audio.
+
+---
+
+# 24. RESUME AFTER INTERRUPTION
+
+Do not automatically replay the unfinished sentence.
+
+If JARVIS said:
+
+> “The problem with that approach is the—”
+
+User:
+
+> “No, that's not what I meant.”
+
+JARVIS should not continue:
+
+> “—budget.”
+
+Instead:
+
+```text
+discard obsolete continuation
+process correction
+generate new response
+```
+
+---
+
+# 25. RESUME ONLY WHEN RELEVANT
+
+If the user interrupts:
+
+> “Wait, what was the second assumption?”
+
+JARVIS can preserve the original reasoning and answer the new question.
+
+If the interruption does not invalidate the original point:
+
+```text
+preserve
+```
+
+If it invalidates the original reasoning:
+
+```text
+abandon
+```
+
+The Conversation Controller decides this.
+
+TTS simply obeys.
+
+---
+
+# 26. AUDIO TIMELINE
+
+Every generated speech segment should have timing metadata.
+
+Example:
+
+```text
+segment_id:
+    seg_04
+
+audio_start:
+    0ms
+
+audio_end:
+    2860ms
+
+word_timings:
+    "Yeah" → 0–310ms
+    "but" → 340–470ms
+    "there's" → 490–720ms
+    "a" → 740–810ms
+    "problem" → 830–1180ms
+```
+
+When supported, provider timing marks can provide synchronization points. SSML systems such as Google Cloud TTS expose timepoints through `<mark>` tags. ([Google Cloud Documentation][2])
+
+---
+
+# 27. TRANSCRIPT SYNCHRONIZATION
+
+The transcript should not simply appear all at once.
+
+It should follow actual speech.
+
+Example:
+
+```text
+AUDIO:
+"Yeah..."
+
+TRANSCRIPT:
+"Yeah..."
+
+AUDIO:
+"but there's a..."
+
+TRANSCRIPT:
+"Yeah, but there's a..."
+
+AUDIO:
+"problem."
+
+TRANSCRIPT:
+"Yeah, but there's a problem."
+```
+
+The UI therefore represents:
+
+> **what JARVIS is actually saying right now.**
+
+---
+
+# 28. SPHERE SYNCHRONIZATION
+
+The sphere should receive the same speech events.
+
+Example:
+
+```text
+speech.start
+speech.segment
+speech.emphasis
+speech.pause
+speech.end
+```
+
+The sphere can then react.
+
+Do not make the sphere independently guess when JARVIS is speaking.
+
+---
+
+# 29. EVENT BUS
+
+Use an event bus between voice and interface.
+
+Example:
+
+```text
+VOICE_EVENT_BUS
+
+speech.start
+speech.chunk
+speech.word
+speech.emphasis
+speech.pause
+speech.interrupt
+speech.cancel
+speech.end
+```
+
+Consumers:
+
+```text
+Transcript
+Sphere
+UI state
+Diagnostics
+Analytics
+```
+
+This prevents direct coupling.
+
+---
+
+# 30. UI IS NOT THE VOICE ENGINE
+
+The HTML interface should not be responsible for:
+
+* API calls
+* API keys
+* provider authentication
+* TTS synthesis
+* generation cancellation
+* voice selection logic
+
+The UI is the face.
+
+The voice service is the nervous system.
+
+---
+
+# 31. API KEY SECURITY
+
+Provider credentials must remain server-side.
+
+Never:
+
+```text
+API_KEY = "secret..."
+```
+
+inside browser JavaScript.
+
+Architecture:
+
+```text
+BROWSER
+   ↓
+LOCAL JARVIS SERVER
+   ↓
+TTS PROVIDER
+```
+
+This also makes provider replacement easier.
+
+---
+
+# 32. PRONUNCIATION LAYER
+
+JARVIS should have a pronunciation dictionary.
+
+Useful for:
+
+* Rwandan names
+* company names
+* neighborhoods
+* technical terms
+* abbreviations
+* project names
+* unusual surnames
+* acronyms
+* foreign words
+
+Example:
+
+```text
+pronunciation:
+    "Nyarutarama"
+        → custom phoneme / provider pronunciation
+
+    "RRA"
+        → "R-R-A"
+
+    "WASAC"
+        → configured pronunciation
+```
+
+The dictionary should be reusable across conversations.
+
+---
+
+# 33. PRONUNCIATION SHOULD BE CONTEXT-AWARE
+
+The same written token may need different pronunciation.
+
+Example:
+
+```text
+"AI"
+```
+
+usually:
+
+> “A-I”
+
+But:
+
+```text
+"AI-generated"
+```
+
+may require different segmentation depending on provider.
+
+The pronunciation layer should normalize before synthesis.
+
+---
+
+# 34. ACRONYMS
+
+Do not blindly pronounce every acronym as a word.
+
+Maintain rules for:
+
+```text
+initialism
+acronym
+abbreviation
+symbol
+unit
+number
+currency
+URL
+email
+```
+
+Examples:
+
+```text
+RRA → R-R-A
+AI → A-I
+GDP → G-D-P
+```
+
+unless the context or pronunciation dictionary explicitly says otherwise.
+
+---
+
+# 35. NUMBERS
+
+Numbers should have a spoken representation.
+
+Example:
+
+```text
+150,000 RWF
+```
+
+may become:
+
+> “one hundred fifty thousand Rwandan francs”
+
+depending on context.
+
+But a code:
+
+```text
+150000
+```
+
+may need digit-by-digit pronunciation.
+
+The semantic layer decides what the number means.
+
+TTS receives the appropriate spoken form.
+
+---
+
+# 36. URLs AND TECHNICAL TEXT
+
+Never blindly read raw URLs aloud.
+
+Instead:
+
+> “I found the official website.”
+
+rather than:
+
+> “H-T-T-P-S colon slash slash…”
+
+unless the user explicitly asks for the URL.
+
+Similarly, code should normally be summarized rather than verbally dumped.
+
+---
+
+# 37. LANGUAGE
+
+The voice pipeline should support language metadata.
+
+Example:
+
+```text
+language:
+    en-GB
+```
+
+Future:
+
+```text
+fr-FR
+rw-RW
+ar
+```
+
+Language switching must not accidentally change the JARVIS identity unless a compatible voice is explicitly selected.
+
+---
+
+# 38. MULTILINGUAL CONTINUITY
+
+If the user says:
+
+> “Okay, noneho mbwira…”
+
+JARVIS should understand the language shift.
+
+The system should distinguish:
+
+```text
+language detection
+```
+
+from:
+
+```text
+voice identity
+```
+
+The same conversational identity should persist.
+
+---
+
+# 39. SSML / PROVIDER MARKUP
+
+If the provider supports SSML or equivalent controls, the adapter may translate the neutral speech directive into provider markup.
+
+Example:
+
+```text
+NEUTRAL:
+
+pause:
+    300ms
+
+rate:
+    -5%
+
+pitch:
+    +1st
+```
+
+Provider adapter:
+
+```text
+<break time="300ms"/>
+<prosody rate="-5%" pitch="+1st">
+...
+</prosody>
+```
+
+The behavioral system should not contain provider-specific markup.
+
+SSML supports controls such as pauses, rate, pitch, volume, pronunciation, and timing marks on compatible engines. ([Google Cloud Documentation][2])
+
+---
+
+# 40. PROVIDER ADAPTER RESPONSIBILITY
+
+The adapter translates:
+
+```text
+JARVIS SPEECH DIRECTIVE
+```
+
+into:
+
+```text
+PROVIDER REQUEST
+```
+
+It owns:
+
+* API format
+* authentication
+* provider-specific parameters
+* SSML generation
+* audio format
+* streaming protocol
+* provider errors
+* provider-specific limitations
+
+It does not own:
+
+* personality
+* emotional interpretation
+* relationship
+* context
+* reasoning
+
+---
+
+# 41. AUDIO FORMAT
+
+The audio layer should normalize provider output into the format expected by the playback engine.
+
+Conceptually:
+
+```text
+TTS PROVIDER
+ ↓
+RAW AUDIO
+ ↓
+AUDIO NORMALIZER
+ ↓
+JARVIS AUDIO FORMAT
+ ↓
+PLAYER
+```
+
+Keep this independent from the provider.
+
+---
+
+# 42. AUDIO QUALITY
+
+Avoid unnecessary transformations.
+
+Every conversion can introduce:
+
+* latency
+* artifacts
+* CPU usage
+* volume inconsistencies
+* synchronization errors
+
+Prefer:
+
+```text
+provider-native compatible format
+```
+
+when possible.
+
+---
+
+# 43. VOLUME NORMALIZATION
+
+Different generated segments should not randomly jump in perceived loudness.
+
+Use controlled normalization.
+
+But do not flatten the dynamic range so aggressively that:
+
+```text
+quiet
+```
+
+and:
+
+```text
+urgent
+```
+
+sound identical.
+
+---
+
+# 44. VOICE CONTINUITY ACROSS CHUNKS
+
+Streaming chunks should sound like one continuous utterance.
+
+Avoid:
+
+```text
+chunk 1:
+slightly different voice
+
+chunk 2:
+different pitch
+
+chunk 3:
+different pacing
+```
+
+The adapter should preserve the same:
+
+* voice
+* settings
+* language
+* prosody baseline
+* session configuration
+
+across the utterance.
+
+---
+
+# 45. SESSION CONTINUITY
+
+Where the provider supports it, maintain the appropriate voice/session context across chunks.
+
+Where it does not:
+
+Use consistent synthesis parameters and segment boundaries.
+
+The user should hear:
+
+> one person speaking continuously,
+
+not:
+
+> multiple TTS requests stitched together.
+
+---
+
+# 46. CACHING
+
+Cache only when useful.
+
+Good candidates:
+
+* repeated fixed phrases
+* wake confirmations
+* system notifications
+* common UI announcements
+* static diagnostics
+
+Do not aggressively cache dynamic conversational speech.
+
+---
+
+# 47. CACHE KEY
+
+If caching speech:
+
+```text
+CACHE_KEY =
+voice_id
++
+language
++
+text
++
+prosody
++
+provider_version
++
+rendering_parameters
+```
+
+Changing any relevant parameter should invalidate the cache.
+
+---
+
+# 48. WAKE CONFIRMATIONS
+
+Short wake responses can be pre-generated.
+
+Examples:
+
+> “Yeah?”
+
+> “I'm listening.”
+
+> “Go ahead.”
+
+These should be extremely fast.
+
+But do not use the exact same phrase every time.
+
+The Conversation Controller can choose from a small set.
+
+---
+
+# 49. ERROR FALLBACK
+
+If TTS fails:
+
+Do not leave the user staring at a frozen interface.
+
+Emit:
+
+```text
+speech.error
+```
+
+Then:
+
+```text
+voice state:
+ERROR
+```
+
+and provide an appropriate fallback.
+
+Example:
+
+> “I can't get the voice output right now. The response is still on screen.”
+
+The exact fallback can be rendered as text.
+
+---
+
+# 50. PROVIDER TIMEOUT
+
+If synthesis takes too long:
+
+```text
+TTS_TIMEOUT
+```
+
+must not freeze the conversation.
+
+The system should be able to:
+
+```text
+cancel
+fallback
+retry
+switch provider
+or present text
+```
+
+according to the configured policy.
+
+---
+
+# 51. RETRY POLICY
+
+Do not blindly retry indefinitely.
+
+Example:
+
+```text
+attempt 1
+   ↓
+failure
+   ↓
+short retry
+   ↓
+failure
+   ↓
+fallback
+```
+
+Repeated failures should trigger diagnostics.
+
+---
+
+# 52. PROVIDER FALLBACK
+
+Future architecture may support:
+
+```text
+PRIMARY TTS
+     ↓
+failure
+     ↓
+SECONDARY TTS
+     ↓
+failure
+     ↓
+TEXT FALLBACK
+```
+
+The fallback should preserve:
+
+* meaning
+* language
+* basic prosody
+* voice identity where possible
+
+---
+
+# 53. INTERRUPTION-SAFE QUEUE
+
+Never allow old speech to remain queued after the conversation changes.
+
+Each queued item must contain:
+
+```text
+conversation_id
+turn_id
+generation_id
+segment_id
+priority
+```
+
+If the generation becomes obsolete:
+
+```text
+discard all associated audio
+```
+
+---
+
+# 54. PRIORITY
+
+Not every speech event has equal priority.
+
+Possible priorities:
+
+```text
+SYSTEM_CRITICAL
+URGENT
+NORMAL
+BACKGROUND
+```
+
+An urgent system event may preempt ordinary speech.
+
+Normal conversation should not be constantly interrupted by low-value notifications.
+
+---
+
+# 55. NO AUDIO OVERLAP
+
+Unless explicitly designed for it, JARVIS should never have:
+
+```text
+two TTS generations
+```
+
+speaking simultaneously.
+
+Audio ownership should be singular.
+
+---
+
+# 56. PLAYBACK STATE
+
+Maintain:
+
+```text
+PLAYBACK_STATE
+
+idle
+buffering
+playing
+paused
+stopping
+stopped
+error
+```
+
+This is separate from:
+
+```text
+CONVERSATION_STATE
+```
+
+and:
+
+```text
+TTS_GENERATION_STATE
+```
+
+---
+
+# 57. THREE DIFFERENT STATES
+
+Do not collapse these:
+
+```text
+CONVERSATION
+    THINKING
+
+TTS
+    GENERATING
+
+AUDIO
+    PLAYING
+```
+
+JARVIS may be:
+
+```text
+thinking = false
+TTS generating = true
+audio playing = true
+```
+
+or:
+
+```text
+thinking = true
+TTS generating = false
+audio playing = false
+```
+
+These states have different meanings.
+
+---
+
+# 58. SPEECH LIFECYCLE
+
+Canonical flow:
+
+```text
+SPEECH_REQUESTED
+       ↓
+SPEECH_PLANNED
+       ↓
+SPEECH_COMMITTED
+       ↓
+TTS_REQUESTED
+       ↓
+TTS_STREAMING
+       ↓
+AUDIO_BUFFERING
+       ↓
+AUDIO_PLAYING
+       ↓
+SPEECH_PROGRESS
+       ↓
+SPEECH_COMPLETE
+```
+
+Possible interruption:
+
+```text
+ANY ACTIVE STATE
+       ↓
+INTERRUPTED
+       ↓
+CANCELLED
+       ↓
+RECOVERY
+```
+
+---
+
+# 59. EVENT CONTRACT
+
+Example:
+
+```text
+{
+  type: "speech.start",
+  conversationId: "conv_17",
+  generationId: "gen_042",
+  segmentId: "seg_03",
+  timestamp: 123456789
+}
+```
+
+Then:
+
+```text
+speech.word
+speech.emphasis
+speech.pause
+speech.interrupt
+speech.cancel
+speech.end
+```
+
+All downstream systems consume these events.
+
+---
+
+# 60. TRANSCRIPT EVENT
+
+Example:
+
+```text
+{
+  type: "speech.transcript",
+  segmentId: "seg_03",
+  text: "Yeah, but here's the problem.",
+  visibleUntil: 1180
+}
+```
+
+The UI uses this to update the AI transcript.
+
+---
+
+# 61. SPHERE EVENT
+
+Example:
+
+```text
+{
+  type: "speech.energy",
+  value: 0.68,
+  duration: 420
+}
+```
+
+The sphere interprets this visually.
+
+The sphere should not know anything about TTS providers.
+
+---
+
+# 62. DEBUGGING
+
+Every speech generation should be traceable.
+
+Example:
+
+```text
+conversation
+ ↓
+response
+ ↓
+speech segment
+ ↓
+prosody directive
+ ↓
+provider request
+ ↓
+audio stream
+ ↓
+playback
+```
+
+This allows the developer to answer:
+
+> “Why did JARVIS sound wrong?”
+
+instead of guessing.
+
+---
+
+# 63. DIAGNOSTIC RECORD
+
+Store development-only metadata such as:
+
+```text
+request_id
+provider
+voice
+segment
+requested_rate
+requested_pitch
+requested_energy
+actual_provider_parameters
+time_to_first_audio
+generation_duration
+playback_duration
+interrupt_time
+cancel_time
+error
+```
+
+Do not expose internal diagnostics to normal users unless requested.
+
+---
+
+# 64. PERFORMANCE METRICS
+
+Measure:
+
+```text
+time_to_first_audio
+time_to_full_audio
+stream_stalls
+interruption_latency
+cancel_latency
+audio_buffer_depth
+TTS_failure_rate
+provider_latency
+stale_audio_events
+voice_switches
+```
+
+These are engineering metrics.
+
+Do not optimize solely for raw API speed.
+
+---
+
+# 65. PRIMARY USER EXPERIENCE METRIC
+
+The real question is:
+
+> **Does JARVIS feel like he is talking with me, rather than playing an audio file at me?**
+
+That depends on the entire pipeline:
+
+```text
+turn detection
++
+timing
++
+streaming
++
+prosody
++
+interruption
++
+transcript synchronization
++
+sphere synchronization
+```
+
+---
+
+# 66. WHAT MUST NEVER HAPPEN
+
+Never allow:
+
+* stale audio after interruption
+* two JARVIS voices speaking simultaneously
+* random voice changes
+* exposed API keys
+* transcript ahead of speech
+* transcript permanently behind speech
+* sphere saying JARVIS is speaking when audio has stopped
+* TTS provider deciding personality
+* huge buffering before first audio
+* infinite retries
+* provider-specific logic scattered throughout the application
+* obsolete speech continuing after user correction
+
+---
+
+# 67. CORE TTS ARCHITECTURE
+
+The production architecture should therefore be:
+
+```text
+                JARVIS BRAIN
+                     │
+                     ▼
+             SPEECH DIRECTOR
+                     │
+                     ▼
+             PROSODY DIRECTIVE
+                     │
+                     ▼
+              TTS INTERFACE
+                     │
+             ┌───────┴───────┐
+             ▼               ▼
+      PROVIDER ADAPTER   FALLBACK
+             │
+             ▼
+        TTS PROVIDER
+             │
+             ▼
+        AUDIO STREAM
+             │
+             ▼
+        AUDIO MANAGER
+             │
+       ┌─────┼─────┐
+       ▼     ▼     ▼
+    PLAYER  EVENTS  METRICS
+             │
+       ┌─────┴─────┐
+       ▼           ▼
+   TRANSCRIPT    SPHERE
+```
+
+---
+
+# 68. FINAL TTS PRINCIPLE
+
+> **TTS should disappear into the experience.**
+
+The user should not think:
+
+> “The API generated some audio.”
+
+They should experience:
+
+> “JARVIS answered me.”
+
+---
+
+# 69. CORE STATEMENT
+
+> **The TTS layer is the vocal instrument of JARVIS—not JARVIS himself.**
+
+The intelligence determines:
+
+**what to say**
+
+The behavioral system determines:
+
+**why and how to say it**
+
+The prosody layer determines:
+
+**how it should sound**
+
+The TTS layer determines:
+
+**how to render that performance into audio**
+
+The audio engine determines:
+
+**how to deliver it without breaking conversation.**
+
+---
+
+# 70. IMPLEMENTATION BOUNDARY
+
+Pillar 09 controls:
+
+* voice rendering
+* TTS provider abstraction
+* provider capability mapping
+* streaming
+* audio generation
+* buffering
+* playback
+* cancellation
+* interruption-safe audio
+* pronunciation
+* audio normalization
+* transcript timing
+* speech events
+* provider failures
+
+It receives:
+
+**PROSODY DIRECTIVE + SPEECH SEGMENTS + TIMING + VOICE IDENTITY**
+
+It outputs:
+
+**AUDIO + SPEECH EVENTS + TIMING DATA**
+
+It does not control:
+
+* personality
+* context
+* relationship
+* emotional interpretation
+* reasoning
+* response content
+
+Those remain upstream.
+
+And this gives us a very clean architecture:
+
+**Pillars 01–08 decide what JARVIS is and how JARVIS should speak.**
+
+**Pillar 09 makes that performance physically happen.**
+
+The particularly important engineering decision is the **generation ID + interrupt/cancel path**. Without that, you can get the horrible experience where the user interrupts JARVIS, but an already-buffered chunk continues playing afterward. Modern streaming TTS research is specifically addressing this kind of mid-utterance interruption and continuous speech problem. ([arXiv][1])
+
+**Next: Pillar 10 — INTERRUPTION & RECOVERY.** That one deserves its own pillar rather than being buried inside TTS, because interruption is not merely “stop the audio”; it is the mechanism that lets JARVIS actually **listen, abandon obsolete thoughts, preserve useful context, understand corrections, and continue the conversation naturally.**
+
+[1]: https://arxiv.org/abs/2608.13831?utm_source=chatgpt.com "VoiceChat-TTS: A Low-Latency Continuous Speech Synthesis Model for Interactive Agents"
+[2]: https://docs.cloud.google.com/text-to-speech/docs/ssml?hl=en&utm_source=chatgpt.com "Speech Synthesis Markup Language (SSML)  |  Cloud Text-to-Speech  |  Google Cloud Documentation"
+[3]: https://arxiv.org/abs/2505.19206?utm_source=chatgpt.com "SpeakStream: Streaming Text-to-Speech with Interleaved Data"

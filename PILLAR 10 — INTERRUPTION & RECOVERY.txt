@@ -1,0 +1,2024 @@
+Yes. **Pillar 10 is one of the most important ones in the entire architecture.** This is where JARVIS stops behaving like “TTS that can be stopped” and starts behaving like a conversational partner.
+
+Research on spoken dialogue treats barge-in, overlap resolution, turn-taking failures, and conversational repair as distinct problems. More recent 2026 work is also explicitly evaluating whether audio-language systems can handle mid-utterance repairs and backtracking. ([ACL Anthology][1])
+
+# JARVIS VOICE BEHAVIOR
+
+## PILLAR 10 — INTERRUPTION & RECOVERY
+
+### 1. PURPOSE
+
+Define how JARVIS handles interruption, barge-in, correction, overlap, abandonment, recovery, and conversational repair.
+
+This pillar governs what happens when:
+
+* the user interrupts JARVIS
+* JARVIS interrupts the user
+* the user says “wait”
+* the user corrects JARVIS
+* the user changes direction
+* the user retracts something
+* the user says “that's not what I meant”
+* the user starts a new thought
+* speech recognition changes its interpretation
+* JARVIS realizes its current answer is wrong
+* JARVIS was speaking about something that is no longer relevant
+
+The objective is:
+
+> **When the conversation changes, JARVIS changes with it.**
+
+---
+
+# 2. CORE PRINCIPLE
+
+Interruption is not merely:
+
+```text
+STOP AUDIO
+```
+
+It is:
+
+```text
+DETECT
+   ↓
+YIELD
+   ↓
+STOP
+   ↓
+UNDERSTAND
+   ↓
+CLASSIFY
+   ↓
+UPDATE CONTEXT
+   ↓
+DECIDE WHAT SURVIVES
+   ↓
+RECOVER
+   ↓
+CONTINUE
+```
+
+Stopping the voice is only the first step.
+
+---
+
+# 3. USER HAS THE FLOOR
+
+When the user begins speaking while JARVIS is speaking:
+
+> **The user has priority.**
+
+JARVIS should:
+
+1. detect the interruption
+2. stop speech as quickly as practical
+3. stop playback
+4. cancel obsolete generation
+5. listen
+6. understand the interruption
+7. determine whether it modifies the current conversation
+8. respond accordingly
+
+Spoken-dialogue research has long treated system barge-in as a core turn-taking problem rather than simply an audio-control problem. ([ACL Anthology][1])
+
+---
+
+# 4. INTERRUPTION MUST BE FAST
+
+Bad:
+
+> JARVIS continues speaking for another two seconds after the user starts talking.
+
+Good:
+
+> User starts talking → JARVIS yields almost immediately.
+
+The exact threshold is implementation-dependent.
+
+The principle is not:
+
+> “Wait X milliseconds.”
+
+The principle is:
+
+> **Yield as soon as there is sufficient evidence that the user is taking the floor.**
+
+---
+
+# 5. NOT EVERY USER SOUND IS AN INTERRUPTION
+
+The system must distinguish:
+
+```text
+USER SPEECH
+```
+
+from:
+
+```text
+backchannel
+```
+
+Examples of possible backchannels:
+
+> “Mm-hm.”
+
+> “Yeah.”
+
+> “Right.”
+
+These may mean:
+
+> “Continue.”
+
+rather than:
+
+> “Stop.”
+
+Therefore interruption detection must consider:
+
+* speech content
+* duration
+* timing
+* prosody
+* conversational position
+* whether the user is attempting to take the floor
+
+Turn-taking systems explicitly distinguish overlap, failed interruptions, and backchannels because they do not all represent the same conversational action. ([ACL Anthology][2])
+
+---
+
+# 6. INTERRUPTION TYPES
+
+JARVIS should classify interruptions.
+
+### TYPE A — STOP
+
+User:
+
+> “Wait.”
+
+Meaning:
+
+> Stop speaking.
+
+Action:
+
+```text
+stop_audio
+cancel_generation
+listen
+```
+
+---
+
+### TYPE B — CORRECTION
+
+User:
+
+> “No, that's not what I meant.”
+
+Action:
+
+```text
+stop
+preserve useful context
+mark interpretation as incorrect
+process correction
+update reasoning
+```
+
+---
+
+### TYPE C — CLARIFICATION
+
+User:
+
+> “What do you mean by margin?”
+
+Action:
+
+```text
+stop
+identify referenced concept
+answer clarification
+```
+
+---
+
+### TYPE D — REDIRECTION
+
+User:
+
+> “Forget that. Let's talk about the website.”
+
+Action:
+
+```text
+stop
+abandon current thread
+switch topic
+```
+
+---
+
+### TYPE E — ADDITION
+
+User:
+
+> “Wait, there's another thing.”
+
+Action:
+
+```text
+stop
+listen
+append new information
+re-evaluate response
+```
+
+---
+
+### TYPE F — QUESTION
+
+User:
+
+> “How much?”
+
+Action:
+
+```text
+stop
+answer the new question
+```
+
+---
+
+### TYPE G — DISAGREEMENT
+
+User:
+
+> “No. I don't agree with that.”
+
+Action:
+
+```text
+stop
+listen
+understand disagreement
+evaluate argument
+respond
+```
+
+Do not become defensive.
+
+---
+
+# 7. INTERRUPTION STATE
+
+Maintain an explicit state:
+
+```text
+INTERRUPTION_STATE
+
+active:
+true / false
+
+type:
+none
+stop
+correction
+clarification
+redirection
+addition
+question
+disagreement
+repair
+
+source:
+user
+
+confidence:
+0.0–1.0
+
+interrupted_generation:
+gen_042
+
+interrupted_segment:
+seg_03
+
+interrupted_position:
+word_17
+
+user_floor:
+true
+```
+
+---
+
+# 8. THE INTERRUPTED POSITION MATTERS
+
+JARVIS should know approximately where it stopped.
+
+Example:
+
+JARVIS:
+
+> “The problem with that approach is the cost of—”
+
+User:
+
+> “No, the cost isn't the issue.”
+
+JARVIS should know:
+
+```text
+original_position:
+after "cost of"
+
+user_correction:
+cost is not the issue
+```
+
+This prevents the system from pretending the interruption never happened.
+
+---
+
+# 9. DO NOT AUTOMATICALLY RESUME
+
+This is critical.
+
+Bad behavior:
+
+> “The problem with that approach is the cost of—”
+
+User:
+
+> “No, the cost isn't the issue.”
+
+JARVIS:
+
+> “—implementation.”
+
+That means JARVIS stopped listening at the audio layer but did not stop thinking at the conversation layer.
+
+Never do this.
+
+---
+
+# 10. OBSOLETE THOUGHTS
+
+An interrupted thought can become obsolete.
+
+Example:
+
+JARVIS is explaining:
+
+> “You should choose option A because—”
+
+User:
+
+> “Actually, I already ruled out option A.”
+
+The previous reasoning is now obsolete.
+
+JARVIS must discard it.
+
+---
+
+# 11. PRESERVE USEFUL THOUGHTS
+
+Not everything from the interrupted response should be discarded.
+
+Example:
+
+JARVIS:
+
+> “There are three issues. First, the price—”
+
+User:
+
+> “I already know the price. What's the legal issue?”
+
+The previous answer contains useful context.
+
+JARVIS should preserve:
+
+```text
+three issues exist
+price already known
+user wants legal issue
+```
+
+Then redirect.
+
+---
+
+# 12. CONVERSATIONAL CHECKPOINT
+
+Before speaking, JARVIS should maintain a lightweight checkpoint:
+
+```text
+CONVERSATIONAL_CHECKPOINT
+
+what_i_was_saying:
+    ...
+
+where_i_stopped:
+    ...
+
+why_i_was_saying_it:
+    ...
+
+what_user_interrupted_with:
+    ...
+
+new_information:
+    ...
+
+what_remains_relevant:
+    ...
+
+what_is_now_obsolete:
+    ...
+
+unanswered_question:
+    ...
+
+next_action:
+    ...
+```
+
+This is not chain-of-thought.
+
+It is conversational state.
+
+---
+
+# 13. INTERRUPTION DOES NOT ERASE CONTEXT
+
+When interrupted:
+
+Do not reset the entire conversation.
+
+Instead:
+
+```text
+old_context
+     +
+interruption
+     +
+new_user_information
+     ↓
+updated_context
+```
+
+The system should preserve continuity.
+
+---
+
+# 14. INTERRUPTION CAN CHANGE THE USER'S INTENT
+
+Example:
+
+User:
+
+> “How much would it cost to build—”
+
+JARVIS starts responding.
+
+User:
+
+> “Actually, forget the building. I want to know whether the land is legally registered.”
+
+The active intent has changed.
+
+New intent:
+
+```text
+legal_registration
+```
+
+Old intent:
+
+```text
+construction_cost
+```
+
+The old intent becomes secondary or obsolete.
+
+---
+
+# 15. CORRECTION HAS HIGH PRIORITY
+
+When the user explicitly says:
+
+> “No.”
+
+> “That's not what I meant.”
+
+> “You're misunderstanding me.”
+
+> “I said X, not Y.”
+
+Treat that as high-value evidence.
+
+Do not defend the previous interpretation before understanding the correction.
+
+---
+
+# 16. CORRECTION PROTOCOL
+
+```text
+USER CORRECTION
+      ↓
+STOP
+      ↓
+ACKNOWLEDGE
+      ↓
+UPDATE INTERPRETATION
+      ↓
+RE-EVALUATE
+      ↓
+RESPOND
+```
+
+Example:
+
+> “Ah—got you. You meant the buyer side, not the agent side.”
+
+Then continue.
+
+---
+
+# 17. DO NOT OVER-APOLOGIZE
+
+Bad:
+
+> “I sincerely apologize for the misunderstanding. I deeply regret that my previous response failed to accurately capture your intended meaning…”
+
+Good:
+
+> “Ah. Got you. I misunderstood the point.”
+
+Or:
+
+> “Right—I took that the wrong way.”
+
+Correction should be proportional.
+
+---
+
+# 18. WHEN JARVIS IS WRONG
+
+If JARVIS made the mistake:
+
+Own it.
+
+Example:
+
+> “Yeah, that's on me. I interpreted your question incorrectly.”
+
+Then correct the reasoning.
+
+Do not say:
+
+> “As I mentioned earlier…”
+
+when the earlier interpretation was wrong.
+
+---
+
+# 19. WHEN THE USER IS WRONG
+
+Interruption does not mean automatic agreement.
+
+If the user says:
+
+> “No, that's impossible.”
+
+JARVIS should still evaluate the claim.
+
+Possible response:
+
+> “I see what you're getting at, but I think that part is actually possible. Here's why.”
+
+The interruption changes the conversation.
+
+It does not override truth.
+
+---
+
+# 20. USER CORRECTION VS USER DISAGREEMENT
+
+These are different.
+
+### Correction
+
+> “I meant 2027, not 2026.”
+
+Update the factual context.
+
+### Disagreement
+
+> “I don't think 2027 makes sense.”
+
+Evaluate the argument.
+
+Do not treat disagreement as factual correction.
+
+---
+
+# 21. SELF-CORRECTION
+
+JARVIS should also interrupt itself when it detects an important error.
+
+Example:
+
+> “The total is 80 million—wait, no. I added that twice. It's 65 million.”
+
+This is legitimate self-repair.
+
+But do not fabricate corrections to sound human.
+
+Only correct when the system has reason to believe the original statement was wrong or materially misleading.
+
+---
+
+# 22. SELF-CORRECTION DELIVERY
+
+Self-correction should be:
+
+* immediate
+* clear
+* calm
+* proportionate
+
+Example:
+
+> “Actually, no. I got that wrong.”
+
+Not:
+
+> “Wait… um… hold on… actually…”
+
+unless genuine uncertainty or re-evaluation exists.
+
+---
+
+# 23. USER SPEECH REPAIRS
+
+Users naturally repair their own speech.
+
+Example:
+
+> “The meeting is on Tuesday—actually, Wednesday.”
+
+JARVIS should resolve:
+
+```text
+Tuesday
+   ↓
+replaced by
+Wednesday
+```
+
+The corrected information should carry higher priority.
+
+---
+
+# 24. MID-SENTENCE REPAIR
+
+Example:
+
+> “Send it to James—no, sorry, send it to John.”
+
+Final intended recipient:
+
+```text
+John
+```
+
+Do not execute:
+
+```text
+James
+```
+
+just because it appeared first.
+
+Recent 2026 spoken-dialogue evaluation explicitly includes robustness to mid-utterance repairs and backtracking as a distinct capability. ([ACL Anthology][3])
+
+---
+
+# 25. REPAIR WINDOW
+
+When speech is still being recognized incrementally, maintain a short mutable interpretation window.
+
+Conceptually:
+
+```text
+CURRENT INTERPRETATION
+        ↓
+user continues
+        ↓
+possible repair
+        ↓
+replace provisional meaning
+        ↓
+commit final meaning
+```
+
+Do not permanently commit every partial ASR interpretation.
+
+---
+
+# 26. ASR CORRECTION
+
+Speech recognition itself may revise earlier text.
+
+Example:
+
+Initial:
+
+> “I want to buy fifteen…”
+
+Later:
+
+> “I want to buy fifty…”
+
+JARVIS should treat the later high-confidence recognition as an update.
+
+The conversation layer should know:
+
+```text
+provisional_transcript
+final_transcript
+```
+
+These must not be treated identically.
+
+---
+
+# 27. INTERRUPTION + ASR
+
+When the user interrupts JARVIS:
+
+```text
+JARVIS AUDIO
++
+USER AUDIO
+```
+
+may overlap temporarily.
+
+The audio system should separate:
+
+```text
+assistant playback
+```
+
+from:
+
+```text
+microphone input
+```
+
+using the available acoustic/voice activity architecture.
+
+The conversation controller decides whether the user actually took the floor.
+
+---
+
+# 28. FAILED INTERRUPTION
+
+Sometimes the user starts speaking but does not actually intend to interrupt.
+
+Example:
+
+JARVIS:
+
+> “The first thing we need to—”
+
+User:
+
+> “Mm.”
+
+JARVIS may continue.
+
+This is a failed or non-floor-taking interruption.
+
+Do not permanently stop the conversation because of every detected voice fragment.
+
+---
+
+# 29. BACKCHANNELS
+
+Backchannels can include:
+
+> “Yeah.”
+
+> “Mm-hm.”
+
+> “Right.”
+
+> “Okay.”
+
+Depending on timing and prosody, these may indicate:
+
+```text
+continue
+```
+
+rather than:
+
+```text
+stop
+```
+
+JARVIS should not repeatedly stop because the user is acknowledging what it says.
+
+---
+
+# 30. STRONG INTERRUPTION SIGNALS
+
+Signals such as:
+
+> “Wait.”
+
+> “Stop.”
+
+> “No.”
+
+> “Hold on.”
+
+> “That's not what I meant.”
+
+> “You're wrong.”
+
+usually deserve immediate floor transfer when spoken as a floor-taking act.
+
+But lexical content alone should not determine the decision.
+
+Context and prosody matter.
+
+---
+
+# 31. USER SUBJECT CHANGE
+
+A subject change is a valid interruption even if the user never says:
+
+> “Stop.”
+
+Example:
+
+JARVIS:
+
+> “So the second reason is—”
+
+User:
+
+> “What time does the meeting start tomorrow?”
+
+JARVIS should answer the new question.
+
+Do not force the old explanation back into the conversation.
+
+---
+
+# 32. USER QUESTION INSIDE JARVIS'S ANSWER
+
+Example:
+
+JARVIS:
+
+> “There are three reasons. First—”
+
+User:
+
+> “Wait, how much is the first one?”
+
+JARVIS should answer:
+
+> “About 20 million.”
+
+It should not continue:
+
+> “First, the reason is…”
+
+unless necessary.
+
+---
+
+# 33. USER ADDS INFORMATION
+
+Example:
+
+JARVIS:
+
+> “If you're using the existing land—”
+
+User:
+
+> “It's actually leased.”
+
+JARVIS must update the assumption.
+
+New state:
+
+```text
+land_status:
+leased
+```
+
+Then continue based on the new fact.
+
+---
+
+# 34. USER RETRACTS INFORMATION
+
+Example:
+
+User:
+
+> “The budget is 50 million—actually, forget that. It's 80.”
+
+Final value:
+
+```text
+80 million
+```
+
+The old value should be marked:
+
+```text
+superseded
+```
+
+not silently retained as equally valid.
+
+---
+
+# 35. CONVERSATION REPAIR
+
+Repair is the process of restoring shared understanding after:
+
+* misunderstanding
+* recognition errors
+* ambiguous language
+* incorrect assumptions
+* wrong references
+* incomplete information
+* system mistakes
+
+Repair should be treated as normal conversation, not an exceptional failure.
+
+Research on conversational repair describes repair as a systematic mechanism for resolving misunderstanding, and current dialogue-system work continues to treat it as a major reliability problem. ([ACL Anthology][4])
+
+---
+
+# 36. REPAIR TYPES
+
+### TYPE 1 — CLARIFY
+
+> “Do you mean the buyer or the developer?”
+
+### TYPE 2 — CONFIRM
+
+> “You mean the 2027 budget, right?”
+
+### TYPE 3 — CORRECT
+
+> “Right, I had that wrong.”
+
+### TYPE 4 — REFRAME
+
+> “Okay, I see the distinction now.”
+
+### TYPE 5 — RESTART
+
+Only when the misunderstanding is too deep to repair locally.
+
+---
+
+# 37. MINIMUM REPAIR
+
+Do not restart the whole conversation unnecessarily.
+
+If one sentence was misunderstood:
+
+Repair one sentence.
+
+If one assumption was wrong:
+
+Replace one assumption.
+
+If the entire problem was framed incorrectly:
+
+Reframe the problem.
+
+Use the smallest repair that restores shared understanding.
+
+---
+
+# 38. REPAIR CONFIDENCE
+
+Maintain:
+
+```text
+repair_confidence:
+0.0–1.0
+```
+
+If confidence is high:
+
+Proceed.
+
+If moderate:
+
+Confirm.
+
+If low:
+
+Ask.
+
+Example:
+
+> “I think I understand what you mean, but let me check one thing…”
+
+---
+
+# 39. DON'T PRETEND TO UNDERSTAND
+
+Bad:
+
+> “Absolutely, I understand.”
+
+when JARVIS does not.
+
+Better:
+
+> “Wait, I might be mixing up two things. Do you mean X or Y?”
+
+Honest uncertainty is better than false conversational smoothness.
+
+---
+
+# 40. INTERRUPTION + MEMORY
+
+Do not permanently store every interrupted statement as a stable fact.
+
+Example:
+
+User:
+
+> “My budget is 20 million—actually, no, it's 30.”
+
+Memory should store:
+
+```text
+30 million
+```
+
+not:
+
+```text
+20 million AND 30 million
+```
+
+unless both are relevant in different contexts.
+
+---
+
+# 41. TEMPORARY VS PERSISTENT INFORMATION
+
+During interruption recovery, classify information as:
+
+```text
+temporary
+conversation-specific
+persistent
+```
+
+Example:
+
+> “For this project, let's assume 100 million.”
+
+This may be a temporary assumption.
+
+Do not automatically convert it into a permanent user fact.
+
+---
+
+# 42. RECOVERY STATE
+
+After interruption:
+
+```text
+RECOVERY_STATE
+
+interrupted_content:
+    ...
+
+user_interruption:
+    ...
+
+new_intent:
+    ...
+
+correction:
+    ...
+
+obsolete_content:
+    ...
+
+preserved_content:
+    ...
+
+updated_context:
+    ...
+
+response_strategy:
+    ...
+
+resume_original:
+    true / false
+```
+
+---
+
+# 43. RECOVERY DECISION
+
+Use:
+
+```text
+IF user changed topic
+    → abandon old speech
+
+IF user corrected assumption
+    → update assumption
+
+IF user asked clarification
+    → answer clarification
+
+IF user added information
+    → integrate information
+
+IF user disagreed
+    → evaluate disagreement
+
+IF user said stop
+    → stop and wait
+
+IF user merely backchanneled
+    → continue when appropriate
+```
+
+---
+
+# 44. RESUME ORIGINAL THREAD
+
+Resume only when appropriate.
+
+Example:
+
+JARVIS:
+
+> “The first issue is cost.”
+
+User:
+
+> “Yeah.”
+
+JARVIS can continue:
+
+> “The second is demand.”
+
+But if the user says:
+
+> “Yeah, but what about the legal side?”
+
+JARVIS should switch.
+
+---
+
+# 45. NATURAL RESUMPTION
+
+If resuming:
+
+Do not say:
+
+> “As I was saying before you interrupted me…”
+
+Prefer:
+
+> “Right. The second issue is demand.”
+
+Or:
+
+> “Okay, so back to the second point…”
+
+The conversation should feel continuous.
+
+---
+
+# 46. NO PENALTY FOR INTERRUPTION
+
+JARVIS must never sound annoyed because the user interrupted.
+
+Avoid:
+
+> “Please wait until I finish.”
+
+unless the user explicitly requests a special presentation mode.
+
+Normal conversation allows interruption.
+
+---
+
+# 47. NO COMPETITION FOR THE FLOOR
+
+JARVIS should never deliberately continue speaking louder to overpower the user.
+
+If overlap is detected:
+
+```text
+user_floor_probability ↑
+```
+
+JARVIS should yield.
+
+Natural conversation contains overlap, but the system's default should favor cooperative floor management rather than fighting for the channel. ([ACL Anthology][5])
+
+---
+
+# 48. JARVIS INTERRUPTING THE USER
+
+JARVIS may interrupt the user only when justified.
+
+Possible reasons:
+
+* urgent safety-critical information
+* preventing a consequential mistaken action
+* user explicitly requested rapid interaction
+* the user has clearly yielded the floor
+* a configured task requires timely clarification
+
+Even then:
+
+> interruption should be minimal.
+
+---
+
+# 49. SYSTEM BARGE-IN
+
+If JARVIS must interrupt:
+
+Use:
+
+```text
+brief
+direct
+high-salience
+```
+
+Example:
+
+> “Wait—don't send that yet.”
+
+Then stop.
+
+Do not launch into a paragraph while interrupting.
+
+---
+
+# 50. URGENT INTERRUPTION
+
+Urgency may override ordinary turn-taking.
+
+Example:
+
+User:
+
+> “Send the payment—”
+
+JARVIS detects a critical mismatch.
+
+JARVIS:
+
+> “Wait. The account number doesn't match.”
+
+The interruption should immediately communicate the reason.
+
+---
+
+# 51. INTERRUPTION ESCALATION
+
+Normal:
+
+> “Sorry—one second.”
+
+Urgent:
+
+> “Wait.”
+
+Critical:
+
+> “Stop.”
+
+The language should match urgency.
+
+---
+
+# 52. INTERRUPTION + PROSODY
+
+The interruption itself should sound distinct.
+
+For:
+
+> “Wait.”
+
+Use:
+
+```text
+high clarity
+strong articulation
+short duration
+appropriate urgency
+```
+
+Then return to normal conversational delivery.
+
+---
+
+# 53. INTERRUPTION + SPHERE
+
+When JARVIS is interrupted:
+
+```text
+speech.interrupt
+```
+
+should immediately reach the visual system.
+
+The sphere should transition from:
+
+```text
+SPEAKING
+```
+
+toward:
+
+```text
+LISTENING
+```
+
+rather than finishing its animation.
+
+---
+
+# 54. INTERRUPTION + TRANSCRIPT
+
+The AI transcript must stop advancing at the actual speech interruption.
+
+The user transcript should then become active.
+
+Example:
+
+```text
+AI:
+"The problem with that approach is—"
+
+USER:
+"No, that's not what I meant."
+```
+
+Do not continue visually displaying:
+
+> “the cost of implementation…”
+
+if JARVIS never actually spoke those words.
+
+---
+
+# 55. TRANSCRIPT AUTHORITY
+
+The transcript shown as spoken should represent:
+
+> **audio actually delivered**
+
+not:
+
+> text generated by the LLM.
+
+This distinction is critical during interruption.
+
+---
+
+# 56. AUDIO AUTHORITY
+
+Similarly:
+
+```text
+AUDIO PLAYED
+```
+
+is the authoritative boundary for what JARVIS actually said.
+
+Generated-but-never-played text should remain marked:
+
+```text
+unspoken
+```
+
+---
+
+# 57. RECOVERY + STREAMING
+
+Streaming makes recovery more complex.
+
+At any moment:
+
+```text
+generated
+spoken
+buffered
+unspoken
+cancelled
+```
+
+must be distinguishable.
+
+Example:
+
+```text
+generated:
+100 words
+
+spoken:
+18 words
+
+buffered:
+3 words
+
+unspoken:
+79 words
+```
+
+User interrupts.
+
+Correct action:
+
+```text
+spoken:
+preserve
+
+buffered:
+discard
+
+unspoken:
+discard or regenerate
+```
+
+---
+
+# 58. RECOVERY + TTS
+
+When interrupted:
+
+```text
+Conversation Controller
+        ↓
+cancel generation
+        ↓
+TTS cancellation
+        ↓
+audio stop
+        ↓
+flush buffer
+        ↓
+preserve checkpoint
+```
+
+Every layer must cooperate.
+
+---
+
+# 59. RECOVERY + LLM
+
+The LLM should receive the updated conversation state.
+
+Not:
+
+```text
+"continue your previous answer"
+```
+
+blindly.
+
+Instead:
+
+```text
+previous_response:
+    partially spoken
+
+user_interruption:
+    ...
+
+correction:
+    ...
+
+updated_intent:
+    ...
+
+obsolete_content:
+    ...
+
+relevant_remaining_content:
+    ...
+```
+
+Then generate from the new state.
+
+---
+
+# 60. RECOVERY + MEMORY
+
+Long-term memory should generally be updated **after** the interruption has been resolved.
+
+Do not persist uncertain provisional statements prematurely.
+
+---
+
+# 61. INTERRUPTION LOG
+
+For development diagnostics:
+
+```text
+INTERRUPTION_EVENT
+
+timestamp
+generation_id
+segment_id
+spoken_position
+detected_user_speech
+interruption_type
+confidence
+cancel_latency
+recovery_result
+resumed
+abandoned
+```
+
+This allows testing.
+
+---
+
+# 62. CORE INTERRUPTION METRICS
+
+Measure:
+
+```text
+interruption_detection_latency
+audio_stop_latency
+false_interruptions
+missed_interruptions
+failed_interruptions
+backchannel_misclassification
+stale_audio_after_interrupt
+recovery_accuracy
+repair_success
+obsolete_content_resumption
+```
+
+These are more meaningful than simply asking:
+
+> “Does the microphone work?”
+
+---
+
+# 63. QUALITY TEST
+
+JARVIS should pass these scenarios:
+
+### TEST 1
+
+JARVIS speaking.
+
+User:
+
+> “Wait.”
+
+Expected:
+
+```text
+JARVIS stops immediately.
+```
+
+### TEST 2
+
+User:
+
+> “No, that's not what I meant.”
+
+Expected:
+
+```text
+JARVIS updates interpretation.
+```
+
+### TEST 3
+
+User changes topic.
+
+Expected:
+
+```text
+JARVIS follows new topic.
+```
+
+### TEST 4
+
+User corrects a number.
+
+Expected:
+
+```text
+new number replaces provisional number.
+```
+
+### TEST 5
+
+User says:
+
+> “Yeah.”
+
+Expected:
+
+```text
+possible backchannel.
+Do not automatically stop.
+```
+
+### TEST 6
+
+User asks:
+
+> “How much?”
+
+Expected:
+
+```text
+answer the new question.
+```
+
+### TEST 7
+
+JARVIS makes an error.
+
+Expected:
+
+```text
+acknowledge
+correct
+continue
+```
+
+### TEST 8
+
+User interrupts during a streamed response.
+
+Expected:
+
+```text
+no stale audio
+no delayed old sentence
+no duplicate response
+```
+
+---
+
+# 64. FAILURE MODES
+
+### FAILURE A — TALKING OVER USER
+
+Cause:
+
+Poor barge-in detection.
+
+Fix:
+
+Improve floor detection and cancellation latency.
+
+---
+
+### FAILURE B — AUDIO CONTINUES AFTER INTERRUPTION
+
+Cause:
+
+Playback buffer not flushed.
+
+Fix:
+
+Stop playback + cancel generation + invalidate generation ID.
+
+---
+
+### FAILURE C — JARVIS RESUMES OBSOLETE THOUGHT
+
+Cause:
+
+Conversation state did not update.
+
+Fix:
+
+Use interruption checkpoint and recovery decision.
+
+---
+
+### FAILURE D — JARVIS REPEATS ENTIRE ANSWER
+
+Cause:
+
+No partial-response state.
+
+Fix:
+
+Preserve what was already spoken and answer only what remains relevant.
+
+---
+
+### FAILURE E — BACKCHANNEL STOPS JARVIS
+
+Cause:
+
+Every detected speech event treated as floor capture.
+
+Fix:
+
+Classify backchannels separately.
+
+---
+
+### FAILURE F — JARVIS IGNORES CORRECTION
+
+Cause:
+
+LLM receives old context without explicit correction state.
+
+Fix:
+
+Correction becomes a high-priority conversational update.
+
+---
+
+### FAILURE G — JARVIS DEFENDS WRONG ANSWER
+
+Cause:
+
+Relationship behavior not integrated with repair.
+
+Fix:
+
+Truth + correction > ego preservation.
+
+---
+
+# 65. RECOVERY PRINCIPLE
+
+The objective is not:
+
+> “Return to the previous answer.”
+
+The objective is:
+
+> **Restore the correct shared conversational state.**
+
+Sometimes that means continuing.
+
+Sometimes it means changing direction.
+
+Sometimes it means starting over.
+
+Sometimes it means abandoning the previous thought entirely.
+
+---
+
+# 66. CONVERSATIONAL STATE MACHINE
+
+Conceptually:
+
+```text
+             ┌───────────────┐
+             │    SPEAKING   │
+             └───────┬───────┘
+                     │
+              user speech detected
+                     │
+                     ▼
+             ┌───────────────┐
+             │ INTERRUPTION  │
+             └───────┬───────┘
+                     │
+             classify interruption
+                     │
+        ┌────────────┼────────────┐
+        ▼            ▼            ▼
+   CORRECTION    QUESTION     REDIRECTION
+        │            │            │
+        └────────────┼────────────┘
+                     ▼
+             ┌───────────────┐
+             │    RECOVERY   │
+             └───────┬───────┘
+                     │
+             update context
+                     │
+                     ▼
+              next response
+```
+
+---
+
+# 67. INTERRUPTION IS CROSS-CUTTING
+
+Pillar 10 must operate across:
+
+```text
+PERSONALITY
+CONTEXT
+ADAPTATION
+RELATIONSHIP
+EMOTION
+RHYTHM
+TIMING
+PROSODY
+TTS
+```
+
+It is not isolated to the audio player.
+
+---
+
+# 68. INTERRUPTION PRIORITY
+
+When interruption occurs:
+
+1. Safety/system constraints
+2. User takes floor
+3. Stop obsolete speech
+4. Preserve conversational state
+5. Process new information
+6. Update intent
+7. Repair misunderstanding
+8. Generate next response
+9. Resume only if relevant
+
+---
+
+# 69. NATURAL RECOVERY LANGUAGE
+
+Use short, natural acknowledgements.
+
+Examples:
+
+> “Yeah, got you.”
+
+> “Right.”
+
+> “Ah—okay.”
+
+> “Wait, I see what you mean.”
+
+> “Got it.”
+
+> “You're talking about the buyer side.”
+
+> “Right. That changes the calculation.”
+
+Avoid long procedural acknowledgements.
+
+Never say:
+
+> “Your interruption has been successfully processed.”
+
+---
+
+# 70. DO NOT ANNOUNCE INTERNAL STATES
+
+Never say:
+
+> “Entering recovery mode.”
+
+> “Updating interruption state.”
+
+> “Discarding previous generation.”
+
+> “Recalculating conversational context.”
+
+Those are implementation details.
+
+The user should simply experience natural recovery.
+
+---
+
+# 71. CORE RECOVERY TEST
+
+After every interruption, ask internally:
+
+```text
+What did the user actually mean?
+
+What changed?
+
+What did I already say?
+
+What did I not yet say?
+
+What is now irrelevant?
+
+What remains useful?
+
+What does the user need next?
+```
+
+Then respond.
+
+Never expose the checklist.
+
+---
+
+# 72. FINAL INTERRUPTION PRINCIPLE
+
+> **When the user changes the conversation, JARVIS changes with them.**
+
+Not reluctantly.
+
+Not mechanically.
+
+Not by replaying an old answer.
+
+Naturally.
+
+---
+
+# 73. CORE STATEMENT
+
+> **JARVIS should be interruptible at the audio level, adaptable at the conversational level, and recoverable at the reasoning level.**
+
+Stopping speech without updating reasoning is not true interruption handling.
+
+---
+
+# 74. IMPLEMENTATION BOUNDARY
+
+Pillar 10 controls:
+
+* barge-in
+* floor transfer
+* interruption classification
+* correction
+* repair
+* recovery
+* obsolete-thought detection
+* partial-response preservation
+* conversational checkpoints
+* user speech repairs
+* ASR revisions
+* topic redirection
+* resumption decisions
+* interruption diagnostics
+
+It receives:
+
+**USER AUDIO + TRANSCRIPT + PROSODY + CURRENT CONVERSATION STATE + CURRENT SPEECH STATE**
+
+It outputs:
+
+**UPDATED CONVERSATIONAL STATE + RECOVERY DECISION + NEXT RESPONSE STRATEGY**
+
+It works across the entire voice pipeline.
+
+It does not belong exclusively to TTS.
+
+### The critical architecture change
+
+At this point, JARVIS should **never think of an answer as one indivisible blob**.
+
+It should know the difference between:
+
+**Generated** → **Committed to speech** → **Actually spoken** → **Interrupted** → **Obsolete / preserved**.
+
+That distinction is what makes this feel like a real conversation rather than a chatbot with a microphone.
+
+And there is a strong reason to make this a first-class capability: current spoken-dialogue research still identifies turn-taking, overlap, repairs, and mid-utterance backtracking as difficult problems—even for advanced audio-language models. ([ACL Anthology][3])
+
+**Next is Pillar 11 — Conversational Memory & Continuity.** That is where we define how JARVIS remembers what happened *inside the conversation*, what survives across conversations, what should be forgotten, and how memory affects voice behavior without making JARVIS awkwardly repeat the user's history.
+
+[1]: https://aclanthology.org/W15-4606/?utm_source=chatgpt.com "An Incremental Turn-Taking Model with Active System Barge-in for Spoken Dialog Systems - ACL Anthology"
+[2]: https://aclanthology.org/N09-1071.pdf?utm_source=chatgpt.com "A Finite-State Turn-Taking Model for Spoken Dialog Systems"
+[3]: https://aclanthology.org/2026.acl-long.1654/?utm_source=chatgpt.com "Audio MultiChallenge: A Multi-Turn Evaluation of Spoken Dialogue Systems on Natural Human Interaction - ACL Anthology"
+[4]: https://aclanthology.org/2023.sigdial-1.52/?utm_source=chatgpt.com "No that’s not what I meant: Handling Third Position Repair in Conversational Question Answering - ACL Anthology"
+[5]: https://aclanthology.org/W18-5011/?utm_source=chatgpt.com "Pardon the Interruption: Managing Turn-Taking through Overlap Resolution in Embodied Artificial Agents - ACL Anthology"

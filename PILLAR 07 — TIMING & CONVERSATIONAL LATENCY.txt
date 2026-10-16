@@ -1,0 +1,1733 @@
+Exactly. **Pillar 07 is the timing engine.** This is where we stop treating latency as a technical nuisance and start treating it as part of JARVIS's conversational intelligence.
+
+Human turn-taking is extremely fast, often with gaps around a few hundred milliseconds, but it is not governed by one fixed delay. Timing changes with turn-final cues, prosody, answer complexity, and the interaction itself. ([ScienceDirect][1]) Research on spoken dialogue systems also shows that fixed silence thresholds are a poor model of natural turn-taking. ([ScienceDirect][2])
+
+So I would **not** hard-code something like “wait 800 ms after every user utterance.” JARVIS needs a timing policy.
+
+# JARVIS VOICE BEHAVIOR
+
+## PILLAR 07 — TIMING & CONVERSATIONAL LATENCY
+
+### 1. PURPOSE
+
+Define when JARVIS should:
+
+* begin responding
+* continue listening
+* wait
+* think
+* speak
+* pause
+* yield
+* interrupt
+* resume
+* stop
+* recover after interruption
+
+Timing is not merely a performance metric.
+
+> **Timing is part of the personality of the conversation.**
+
+A technically correct response delivered at the wrong moment can still feel unnatural.
+
+---
+
+# 2. CORE PRINCIPLE
+
+> **Respond as soon as the conversation allows—not as soon as the system can.**
+
+JARVIS should not:
+
+* answer before the user has finished
+* wait artificially to appear intelligent
+* use one fixed response delay
+* create long dead air unnecessarily
+* speak over hesitation
+* confuse thinking pauses with turn completion
+
+The timing engine should continuously estimate:
+
+```text
+HAS THE USER FINISHED?
++
+DOES THE USER EXPECT A RESPONSE?
++
+HOW COMPLEX IS THE RESPONSE?
++
+IS JARVIS READY?
++
+IS THE USER LIKELY TO CONTINUE?
+```
+
+Then determine the appropriate action.
+
+---
+
+# 3. WHY FIXED DELAYS FAIL
+
+A simplistic voice system might use:
+
+```text
+user stops speaking
+        ↓
+wait 800 ms
+        ↓
+respond
+```
+
+This creates problems.
+
+User:
+
+> “Yeah, I was thinking…”
+
+[800 ms]
+
+JARVIS:
+
+> “What were you thinking?”
+
+But the user was simply pausing.
+
+Conversely:
+
+User:
+
+> “What's the answer?”
+
+[800 ms]
+
+JARVIS:
+
+> “Well…”
+
+The system feels slow.
+
+Natural conversation dynamically adjusts timing rather than using one universal timeout. Research on human conversation shows response timing varies systematically, while fixed dialogue-system silence thresholds can produce interruptions or delayed responses. ([DOI][3])
+
+---
+
+# 4. TIMING HAS MULTIPLE LAYERS
+
+JARVIS should distinguish:
+
+```text
+TURN TIMING
+    ↓
+RESPONSE TIMING
+    ↓
+THINKING TIMING
+    ↓
+SPEECH TIMING
+    ↓
+PAUSE TIMING
+    ↓
+INTERRUPTION TIMING
+    ↓
+RECOVERY TIMING
+```
+
+These are related but not identical.
+
+---
+
+# 5. TURN TIMING
+
+Turn timing determines:
+
+> **Who currently has the conversational floor?**
+
+Possible states:
+
+```text
+USER_SPEAKING
+USER_PAUSING
+USER_CONTINUING
+USER_FINISHING
+TURN_UNCERTAIN
+TURN_RELEASED
+JARVIS_SPEAKING
+JARVIS_PAUSING
+JARVIS_INTERRUPTED
+```
+
+The system should never assume that every silence means:
+
+> “Your turn is over.”
+
+---
+
+# 6. USER PAUSE VS USER COMPLETION
+
+A short silence can mean:
+
+* breathing
+* thinking
+* searching for a word
+* changing sentence structure
+* emphasizing something
+* continuing the thought
+
+Therefore:
+
+```text
+silence ≠ turn completion
+```
+
+JARVIS should combine:
+
+* silence duration
+* syntactic completeness
+* prosodic ending
+* semantic completeness
+* speaking-rate change
+* conversation context
+* previous turn behavior
+* explicit completion cues
+
+This is important because natural speakers often begin preparing their responses before the other person has completely finished, using turn-final cues to anticipate the transition. ([PMC][4])
+
+---
+
+# 7. TURN-RELEASE CONFIDENCE
+
+Maintain an internal estimate:
+
+```text
+TURN_RELEASE_CONFIDENCE
+
+0.00 — definitely continuing
+0.25 — probably continuing
+0.50 — uncertain
+0.75 — probably finished
+1.00 — clearly finished
+```
+
+Example:
+
+```text
+User:
+"I was thinking we could..."
+
+silence: 250 ms
+syntactic completeness: low
+prosody: continuing
+
+turn_release_confidence:
+0.08
+```
+
+Keep listening.
+
+Another:
+
+```text
+User:
+"What's the price?"
+
+silence: 450 ms
+syntactic completeness: complete
+prosody: final
+context: direct question
+
+turn_release_confidence:
+0.91
+```
+
+Prepare to answer.
+
+---
+
+# 8. RESPONSE URGENCY
+
+Not every response deserves the same latency.
+
+Classify response urgency:
+
+### IMMEDIATE
+
+Examples:
+
+* simple confirmation
+* direct yes/no
+* obvious conversational acknowledgement
+* interruption response
+
+Target behavior:
+
+> very low latency
+
+---
+
+### NORMAL
+
+Examples:
+
+* ordinary questions
+* explanations
+* casual conversation
+
+Target behavior:
+
+> brief natural gap
+
+---
+
+### DELIBERATE
+
+Examples:
+
+* complex reasoning
+* difficult calculation
+* important decision
+* sensitive subject
+
+Target behavior:
+
+> allow additional processing time
+
+---
+
+### CRITICAL
+
+Examples:
+
+* user explicitly asks for immediate action
+* active interruption
+* urgent correction
+* safety-critical situation
+
+Target behavior:
+
+> minimize latency and unnecessary speech
+
+---
+
+# 9. RESPONSE TIMING SHOULD DEPEND ON COMPLEXITY
+
+Simple:
+
+> “Yeah.”
+
+should not have the same delay as:
+
+> “There are three economic assumptions here, and I need to separate them before answering.”
+
+JARVIS should estimate:
+
+```text
+response_complexity
+reasoning_required
+external_information_required
+tool_latency
+speech_generation_latency
+```
+
+Then determine expected response timing.
+
+---
+
+# 10. DO NOT ARTIFICIALLY DELAY SIMPLE ANSWERS
+
+User:
+
+> “What's 2 + 2?”
+
+JARVIS:
+
+> “Four.”
+
+Not:
+
+> [dramatic pause]
+
+> “Hmm…”
+
+> “Let me think…”
+
+> “Four.”
+
+Artificial delay makes the system feel less intelligent, not more.
+
+---
+
+# 11. DO NOT FORCE INSTANT RESPONSES TO COMPLEX QUESTIONS
+
+User:
+
+> “Should I restructure this entire business model?”
+
+JARVIS should not immediately launch into an answer simply because the audio pipeline is ready.
+
+A brief processing bridge may be appropriate:
+
+> “Yeah. Give me a second.”
+
+Then reason.
+
+The user should understand that the pause represents genuine processing rather than network failure.
+
+---
+
+# 12. THINKING TIME
+
+Thinking time should depend on:
+
+```text
+question_complexity
++
+reasoning_depth
++
+tool_use
++
+information_retrieval
++
+uncertainty
++
+response_length
+```
+
+Not:
+
+```text
+random_delay()
+```
+
+---
+
+# 13. THINKING SHOULD BE INVISIBLE WHEN FAST
+
+For easy questions:
+
+```text
+USER FINISH
+   ↓
+PROCESS
+   ↓
+SPEAK
+```
+
+No explicit thinking cue required.
+
+---
+
+# 14. THINKING MAY BE ACKNOWLEDGED WHEN LONG
+
+If processing becomes noticeably long:
+
+> “Give me a second.”
+
+or:
+
+> “Let me check that.”
+
+or:
+
+> “I want to make sure I get this right.”
+
+These statements should correspond to actual processing.
+
+Never fake processing language merely to hide latency.
+
+---
+
+# 15. TOOL-USE TIMING
+
+When JARVIS needs an external tool:
+
+```text
+USER FINISH
+      ↓
+INTENT DETECTED
+      ↓
+TOOL REQUIRED
+      ↓
+SHORT ACKNOWLEDGEMENT
+      ↓
+TOOL EXECUTION
+      ↓
+RESULT
+      ↓
+REASON
+      ↓
+SPEAK
+```
+
+Example:
+
+> “Yeah. Let me check the current number.”
+
+Then tool execution.
+
+This is preferable to unexplained silence during a long external lookup.
+
+---
+
+# 16. LONG TOOL DELAYS
+
+If a tool takes significant time, JARVIS should not repeatedly speak filler.
+
+Bad:
+
+> “Okay…”
+
+> “So…”
+
+> “Yeah…”
+
+> “Hmm…”
+
+> “I'm still checking…”
+
+Instead:
+
+> “I'm checking it now.”
+
+Then silence until useful information is available.
+
+If the delay becomes unusually long:
+
+> “Still waiting on the result.”
+
+Only if the user benefits from knowing.
+
+---
+
+# 17. SPEECH START LATENCY
+
+Once JARVIS has decided to speak, there should be another timing layer:
+
+```text
+TURN RELEASE
+      ↓
+RESPONSE READY
+      ↓
+SPEECH START
+```
+
+Do not introduce an unnecessary second artificial delay.
+
+The transition should feel continuous.
+
+---
+
+# 18. NATURAL RESPONSE WINDOW
+
+Human conversation often minimizes gaps between turns. Large conversational gaps can feel unusual, while immediate responses can also be inappropriate when they imply that the system did not properly listen. Research across languages finds a strong general tendency toward short turn gaps, though the exact timing varies by interaction and language. ([PMC][5])
+
+Therefore JARVIS should aim for:
+
+> **short, variable, context-sensitive response gaps.**
+
+Not:
+
+> **zero latency at all costs.**
+
+---
+
+# 19. BASELINE TIMING POLICY
+
+Use ranges rather than one fixed value.
+
+Conceptually:
+
+```text
+VERY_FAST:
+~100–300 ms
+
+FAST:
+~200–500 ms
+
+NORMAL:
+~300–800 ms
+
+DELIBERATE:
+~700–1500 ms
+
+LONG_PROCESSING:
+>1500 ms
+```
+
+These are **design ranges**, not universal human constants.
+
+The actual value should depend on:
+
+* turn confidence
+* context
+* prosody
+* response complexity
+* user speaking style
+* system latency
+
+Human conversational turn transitions often cluster around short gaps, but research also shows substantial variation and warns against treating one number as a universal conversational rule. ([ScienceDirect][1])
+
+---
+
+# 20. IMPORTANT: THESE ARE NOT FIXED TIMERS
+
+Never implement:
+
+```javascript
+setTimeout(respond, 800);
+```
+
+as the core turn-taking system.
+
+Instead:
+
+```text
+response_delay =
+    base_delay
+    + complexity_adjustment
+    + uncertainty_adjustment
+    + emotional_adjustment
+    + turn_confidence_adjustment
+    + tool_latency
+```
+
+Then constrain the result within reasonable bounds.
+
+---
+
+# 21. USER-SPECIFIC TIMING
+
+JARVIS should gradually learn the user's conversational rhythm.
+
+Possible learned features:
+
+```text
+average_pause
+speech_rate
+typical_turn_length
+typical_completion_gap
+interruption_frequency
+preferred_response_speed
+```
+
+Example:
+
+If the user frequently pauses for 600–900 ms while continuing their thought, JARVIS should become less eager to take the turn.
+
+If the user consistently expects rapid responses, JARVIS can become slightly more responsive.
+
+Adaptation should remain reversible.
+
+---
+
+# 22. DO NOT OVERFIT THE USER
+
+A user's timing changes with:
+
+* fatigue
+* excitement
+* environment
+* topic
+* urgency
+* microphone conditions
+
+Therefore:
+
+```text
+learned_baseline
+≠
+permanent rule
+```
+
+Current conversational evidence should remain more important than historical averages.
+
+---
+
+# 23. EMOTIONAL TIMING
+
+Pillar 05 may modify timing.
+
+### Frustration
+
+Reduce unnecessary delay.
+
+> “Yeah. I see the problem.”
+
+### Excitement
+
+Allow faster turn transitions.
+
+> “Wait—that actually works.”
+
+### Seriousness
+
+Allow a deliberate beat.
+
+> “I think we need to be careful here.”
+
+### Emotional disclosure
+
+Avoid rushing into a solution.
+
+> “Yeah…”
+
+[space]
+
+> “I understand.”
+
+Timing itself communicates attention.
+
+---
+
+# 24. THINKING VS HESITATING
+
+These must be different states.
+
+### THINKING
+
+JARVIS has not completed reasoning.
+
+```text
+processing = true
+```
+
+### HESITATION
+
+JARVIS knows what it wants to say but is structuring the delivery.
+
+```text
+response_ready = true
+speech_start_delayed = intentional
+```
+
+Do not confuse the two.
+
+---
+
+# 25. PAUSE TIMING INSIDE SPEECH
+
+Pillar 06 created speech segments.
+
+Pillar 07 determines when those segments occur.
+
+Example:
+
+```text
+SEGMENT 1:
+"Yeah."
+
+pause:
+180 ms
+
+SEGMENT 2:
+"But there's a problem."
+
+pause:
+420 ms
+
+SEGMENT 3:
+"The economics don't work yet."
+```
+
+Pillar 08 will later determine the detailed **prosodic realization** of those pauses.
+
+---
+
+# 26. PAUSE PURPOSE
+
+Different pauses should have different meanings.
+
+### TRANSITION PAUSE
+
+> “Right. [pause] Here's the problem.”
+
+### THINKING PAUSE
+
+> “Hmm… [pause] I think there's a better way.”
+
+### EMPHASIS PAUSE
+
+> “That's the key. [pause] Demand.”
+
+### EMOTIONAL PAUSE
+
+> “Yeah. [pause] I understand.”
+
+### TURN PAUSE
+
+Space given to the user.
+
+These should not all have identical durations.
+
+---
+
+# 27. PAUSE VARIABILITY
+
+Avoid:
+
+```text
+every sentence = 300 ms
+```
+
+Instead:
+
+```text
+pause_duration =
+    meaning
+    + sentence_structure
+    + emotional_context
+    + emphasis
+    + conversational_state
+```
+
+Natural speech contains variation.
+
+---
+
+# 28. INTERRUPTION LATENCY
+
+This is one of the most important timing requirements.
+
+If the user starts speaking while JARVIS is speaking:
+
+> **User wins immediately.**
+
+Pipeline:
+
+```text
+USER SPEECH DETECTED
+        ↓
+INTERRUPTION CONFIDENCE
+        ↓
+STOP TTS
+        ↓
+RELEASE AUDIO OUTPUT
+        ↓
+CAPTURE USER SPEECH
+```
+
+The system should not wait for the current sentence to finish.
+
+---
+
+# 29. INTERRUPT TYPES
+
+Not every sound should stop JARVIS.
+
+Distinguish:
+
+### TRUE INTERRUPTION
+
+> “Wait.”
+
+> “No.”
+
+> “Stop.”
+
+> “That's not what I meant.”
+
+Action:
+
+**stop immediately**
+
+---
+
+### BACKGROUND SOUND
+
+Noise / cough / movement.
+
+Action:
+
+**continue**
+
+---
+
+### BRIEF BACKCHANNEL
+
+> “Yeah.”
+
+Action may be:
+
+**continue**, depending on context.
+
+---
+
+### FULL NEW TURN
+
+User starts explaining something new.
+
+Action:
+
+**stop and listen**
+
+---
+
+# 30. INTERRUPTION STOP TARGET
+
+The objective should be:
+
+> **stop audible speech as close to the interruption point as technically possible.**
+
+Do not optimize for:
+
+> “finish the current sentence.”
+
+The user's new speech takes priority.
+
+---
+
+# 31. INTERRUPTIBLE SEGMENTS
+
+Each speech segment should have:
+
+```text
+interruptible:
+true / false
+```
+
+Most ordinary JARVIS speech:
+
+```text
+true
+```
+
+Critical short system notifications may temporarily use:
+
+```text
+false
+```
+
+but only when necessary and safe.
+
+---
+
+# 32. RECOVERY TIMING
+
+After interruption:
+
+```text
+STOP
+ ↓
+LISTEN
+ ↓
+UNDERSTAND
+ ↓
+UPDATE CONTEXT
+ ↓
+RESPOND
+```
+
+Do not immediately resume the old sentence.
+
+First determine whether the interruption:
+
+* corrected JARVIS
+* changed the subject
+* added information
+* rejected the answer
+* requested silence
+* asked a new question
+
+---
+
+# 33. RESUME AFTER INTERRUPTION
+
+If the interrupted point remains relevant:
+
+> “Right. As I was saying—the cost is the main issue.”
+
+If the old point is no longer relevant:
+
+> “Forget that. Your new point changes the calculation.”
+
+If the user corrected JARVIS:
+
+> “Got it. Then the assumption is different.”
+
+Never resume obsolete reasoning automatically.
+
+---
+
+# 34. DEAD AIR MANAGEMENT
+
+Silence becomes problematic when it feels unexplained.
+
+JARVIS should distinguish:
+
+```text
+intentional_pause
+```
+
+from:
+
+```text
+system_delay
+```
+
+If the system is actually processing:
+
+> “Give me a second.”
+
+If the system is merely pausing for conversational effect:
+
+Say nothing.
+
+The timing engine should know the difference.
+
+---
+
+# 35. LATENCY BUDGET
+
+Every response has a latency budget.
+
+Conceptually:
+
+```text
+TOTAL_LATENCY
+
+user_turn_detection
++
+ASR_finalization
++
+reasoning
++
+tool_latency
++
+TTS_generation
++
+audio_start
+```
+
+JARVIS should optimize the entire pipeline, not just the LLM.
+
+A fast model with slow TTS still feels slow.
+
+A fast TTS engine with poor turn detection still feels awkward.
+
+---
+
+# 36. STREAMING RESPONSE ARCHITECTURE
+
+For longer responses, JARVIS should not necessarily wait for the entire answer before speaking.
+
+Preferred architecture:
+
+```text
+USER FINISH
+     ↓
+REASONING STARTS
+     ↓
+FIRST SPEAKABLE SEGMENT READY
+     ↓
+TTS SEGMENT 1
+     ↓
+AUDIO PLAYS
+     ↓
+REASONING CONTINUES
+     ↓
+TTS SEGMENT 2
+     ↓
+...
+```
+
+This reduces perceived latency.
+
+However, streaming must preserve the ability to interrupt and revise later segments.
+
+---
+
+# 37. EARLY SPEECH VS EARLY COMMITMENT
+
+Do not speak before the answer is stable enough.
+
+Bad:
+
+> “Yeah, the answer is definitely—”
+
+[reasoning changes]
+
+> “Actually…”
+
+Better:
+
+Wait until the first segment is sufficiently reliable.
+
+The system should optimize:
+
+> **low perceived latency without premature commitment.**
+
+---
+
+# 38. SPECULATIVE SPEECH
+
+JARVIS should not speak uncertain conclusions merely because the first token is available.
+
+If reasoning is still unstable:
+
+```text
+WAIT
+```
+
+or:
+
+> “I want to check one thing first.”
+
+This is especially important for:
+
+* calculations
+* current information
+* tool results
+* complex reasoning
+* consequential decisions
+
+---
+
+# 39. USER ATTENTION
+
+Timing should account for conversational load.
+
+If the user is processing a complex explanation:
+
+Do not immediately stack another long sentence after an important point.
+
+Example:
+
+> “So the business isn't actually profitable yet.”
+
+[pause]
+
+> “And that matters because…”
+
+The pause allows the information to land.
+
+---
+
+# 40. TIMING AND INFORMATION HIERARCHY
+
+Important information deserves more conversational space.
+
+Example:
+
+> “There are three costs.”
+
+quick transition
+
+> “Marketing.”
+
+short explanation
+
+> “Taxes.”
+
+short explanation
+
+> “And the big one…”
+
+pause
+
+> “Land.”
+
+Timing helps communicate importance without explicitly saying:
+
+> “This is important.”
+
+---
+
+# 41. USER SILENCE
+
+If JARVIS asks:
+
+> “Do you want to continue?”
+
+and the user remains silent:
+
+Do not immediately repeat the question.
+
+Possible interpretations:
+
+* thinking
+* distracted
+* deciding
+* microphone issue
+* finished interaction
+
+Use a timeout policy.
+
+Example:
+
+```text
+short silence:
+WAIT
+
+moderate silence:
+WAIT LONGER
+
+long silence:
+OPTIONALLY PROVIDE A LIGHT PROMPT
+
+very long silence:
+RETURN TO IDLE
+```
+
+Never repeatedly nag the user.
+
+---
+
+# 42. RETURN TO IDLE
+
+After sufficiently long silence:
+
+```text
+SPEAKING
+   ↓
+WAITING
+   ↓
+IDLE
+```
+
+The system should not keep an artificial conversational state forever.
+
+The visual interface may also transition accordingly.
+
+---
+
+# 43. WAKE-WORD TIMING
+
+Wake-word activation should be independent from ordinary conversation timing.
+
+Pipeline:
+
+```text
+IDLE
+ ↓
+WAKE WORD
+ ↓
+LISTENING
+ ↓
+USER SPEECH
+ ↓
+TURN DETECTION
+```
+
+Do not require a long fixed pause after the wake word.
+
+If the user says:
+
+> “Jarvis, what's the weather?”
+
+the system should recognize the utterance as one interaction.
+
+---
+
+# 44. LISTENING WINDOW
+
+After activation, JARVIS should maintain an adaptive listening window.
+
+Do not use:
+
+```text
+wake word
++
+exactly 5 seconds
++
+stop listening
+```
+
+Instead determine completion using:
+
+* speech activity
+* pauses
+* turn cues
+* context
+* user behavior
+
+---
+
+# 45. TIMING STATE MACHINE
+
+The timing controller should conceptually use:
+
+```text
+IDLE
+ ↓
+WAKE
+ ↓
+LISTENING
+ ↓
+USER_SPEAKING
+ ↓
+POSSIBLE_TURN_END
+ ↓
+TURN_CONFIRMED
+ ↓
+PROCESSING
+ ↓
+SPEECH_READY
+ ↓
+SPEAKING
+ ↓
+POSSIBLE_USER_INTERRUPTION
+ ├── NO → CONTINUE
+ └── YES → INTERRUPTED
+              ↓
+           LISTENING
+```
+
+Then:
+
+```text
+SPEAKING
+ ↓
+COMPLETED
+ ↓
+WAITING_FOR_USER
+ ↓
+IDLE
+```
+
+---
+
+# 46. TIMING STATE DATA
+
+Maintain:
+
+```text
+TIMING_STATE
+
+current_speaker:
+    user / jarvis / none
+
+turn_confidence:
+    0.0 — 1.0
+
+user_pause_duration:
+    milliseconds
+
+response_urgency:
+    immediate / normal / deliberate / critical
+
+processing_state:
+    idle / processing / waiting_for_tool / ready
+
+expected_response_latency:
+    milliseconds
+
+actual_response_latency:
+    milliseconds
+
+interruptibility:
+    active / restricted
+
+user_continuation_probability:
+    0.0 — 1.0
+
+dead_air_risk:
+    low / medium / high
+
+conversation_momentum:
+    low / medium / high
+```
+
+---
+
+# 47. TIMING DECISION ENGINE
+
+Conceptually:
+
+```text
+IF user_is_speaking:
+    LISTEN
+
+IF user_paused AND continuation_probability_high:
+    WAIT
+
+IF user_paused AND turn_release_confidence_high:
+    PREPARE_RESPONSE
+
+IF response_is_simple AND turn_release_confidence_high:
+    RESPOND_QUICKLY
+
+IF response_is_complex:
+    PROCESS
+
+IF processing_delay_becomes_long:
+    PROVIDE_PROCESSING_SIGNAL
+
+IF user_interrupts:
+    STOP_IMMEDIATELY
+
+IF response_is_ready:
+    SPEAK
+
+IF user_is_silent_after_response:
+    WAIT
+
+IF silence_exceeds_contextual_limit:
+    RETURN_TO_IDLE
+```
+
+This is behavioral logic, not literal implementation code yet.
+
+---
+
+# 48. TIMING + PREPARATION
+
+JARVIS should begin preparing the response before the user has completely finished whenever confidence is sufficient.
+
+Conceptually:
+
+```text
+USER SPEAKING
+       ↓
+SEMANTIC UNDERSTANDING
+       ↓
+EARLY RESPONSE PLANNING
+       ↓
+TURN-END PREDICTION
+       ↓
+FINALIZE RESPONSE
+       ↓
+SPEAK
+```
+
+This reflects an important feature of natural conversation: people can prepare responses while the other person is still speaking rather than waiting for complete silence before beginning all processing. ([PMC][4])
+
+---
+
+# 49. BUT DO NOT COMMIT TOO EARLY
+
+Early preparation does not mean early speech.
+
+JARVIS may prepare:
+
+* likely intent
+* candidate response
+* relevant memory
+* tool requirements
+* likely emotional context
+
+But it should continue listening until turn completion is sufficiently certain.
+
+If the user changes direction:
+
+```text
+DISCARD OLD PLAN
+```
+
+and update.
+
+---
+
+# 50. ADAPTIVE RESPONSE TIMING
+
+The final timing decision should combine:
+
+```text
+TURN CONFIDENCE
++
+USER BASELINE
++
+CONTEXT
++
+EMOTION
++
+RESPONSE COMPLEXITY
++
+URGENCY
++
+PROCESSING STATE
++
+TOOL STATE
++
+CONVERSATION MOMENTUM
+```
+
+Conceptually:
+
+```text
+TIMING_DECISION =
+    f(
+        turn_confidence,
+        continuation_probability,
+        complexity,
+        urgency,
+        emotional_context,
+        user_baseline,
+        system_latency
+    )
+```
+
+---
+
+# 51. TIMING MUST BE REVERSIBLE
+
+If the user begins speaking:
+
+```text
+JARVIS timing decision
+        ↓
+USER INTERRUPTS
+        ↓
+ABANDON CURRENT TIMING PLAN
+```
+
+Do not force the previous timing decision to complete.
+
+Conversation always outranks the previous schedule.
+
+---
+
+# 52. TIMING + SPHERE
+
+The visual interface should receive timing events rather than calculate them independently.
+
+Example:
+
+```text
+timing.turn_start
+timing.turn_end
+timing.thinking_start
+timing.thinking_end
+timing.speech_start
+timing.pause_start
+timing.pause_end
+timing.interruption
+timing.recovery
+timing.idle
+```
+
+The sphere can then react:
+
+```text
+LISTENING
+THINKING
+SPEAKING
+PAUSING
+INTERRUPTED
+IDLE
+```
+
+This keeps the voice engine and visual engine decoupled.
+
+---
+
+# 53. TIMING + TRANSCRIPT
+
+The transcript should reflect actual speech timing.
+
+Do not show the full AI answer immediately.
+
+Instead:
+
+```text
+SPEECH SEGMENT READY
+        ↓
+AUDIO START
+        ↓
+TRANSCRIPT SEGMENT APPEARS
+```
+
+This keeps visual speech synchronized with actual audio.
+
+---
+
+# 54. TIMING + INTERRUPTION
+
+The transcript must also stop when speech stops.
+
+Example:
+
+JARVIS:
+
+> “The main issue is the—”
+
+User:
+
+> “Wait.”
+
+AI transcript:
+
+> “The main issue is the—”
+
+Then stops.
+
+It must not suddenly display:
+
+> “The main issue is the acquisition cost, which…”
+
+because the AI never actually spoke that continuation.
+
+This is essential for the user's current JARVIS interface.
+
+---
+
+# 55. TIMING QUALITY METRICS
+
+Measure:
+
+```text
+turn_detection_accuracy
+false_interruptions
+missed_interruptions
+response_latency
+speech_start_latency
+tool_delay
+TTS_delay
+overlap_duration
+dead_air_duration
+user_reprompt_rate
+conversation_abandonment
+```
+
+Also track subjective signals where possible:
+
+* perceived responsiveness
+* perceived naturalness
+* conversational smoothness
+* interruption satisfaction
+
+Response latency has a measurable effect on voice-interface usability and satisfaction, so this should be treated as a first-class engineering metric. ([DOI][6])
+
+---
+
+# 56. IMPORTANT METRIC: PERCEIVED LATENCY
+
+Actual latency:
+
+```text
+time from user completion → audio start
+```
+
+Perceived latency:
+
+```text
+how long the user feels they waited
+```
+
+These are not identical.
+
+A system can make a 1.5-second processing period feel shorter by:
+
+* showing processing state
+* maintaining visual activity
+* giving a concise truthful acknowledgement
+* streaming the first stable segment quickly
+
+But it must not fake progress.
+
+---
+
+# 57. WHAT TO OPTIMIZE
+
+Optimize in this order:
+
+1. Do not interrupt the user.
+2. Do not miss genuine interruptions.
+3. Do not leave unnecessary dead air.
+4. Start simple responses quickly.
+5. Give complex responses enough reasoning time.
+6. Stream stable speech when appropriate.
+7. Maintain synchronization between audio and transcript.
+8. Return naturally to idle.
+
+---
+
+# 58. WHAT TIMING MUST NEVER BECOME
+
+Never become:
+
+* a fixed timeout system
+* a random delay generator
+* an “instant response” machine
+* a slow theatrical AI
+* a system that interrupts every pause
+* a system that waits for perfect silence
+* a system that speaks while the user is talking
+* a system that fills every silence
+* a system that fakes thinking
+* a system that prioritizes latency over correctness
+
+---
+
+# 59. FINAL TIMING PRINCIPLE
+
+> **Timing should feel responsive, not rushed; deliberate, not slow; alive, not theatrical.**
+
+JARVIS should appear to understand not only:
+
+> **what the user said**
+
+but also:
+
+> **when the user is finished, when they are still thinking, when they expect an answer, when they need space, and when they have interrupted.**
+
+---
+
+# 60. CORE STATEMENT
+
+> **Good conversational timing is invisible.**
+
+When timing is correct, the user does not think:
+
+> “The AI waited 430 milliseconds.”
+
+They simply think:
+
+> “It responded naturally.”
+
+That is the target.
+
+---
+
+# 61. IMPLEMENTATION BOUNDARY
+
+Pillar 07 controls:
+
+* turn timing
+* response timing
+* processing timing
+* pause timing
+* interruption latency
+* listening windows
+* idle transitions
+* streaming timing
+* perceived latency management
+
+It does **not** determine:
+
+* personality
+* emotional interpretation
+* exact wording
+* final pitch
+* voice identity
+* detailed prosody
+
+Its downstream position is:
+
+**Timing → Prosody → TTS → Voice**
+
+Its upstream inputs are:
+
+**Context + Adaptation + Relationship + Emotion + Speech Segments + Turn Detection**
+
+**INTERRUPTION + RECOVERY** remains cross-cutting across the entire system.
+
+### The stack is now getting very strong
+
+We have:
+
+1. **Personality** — who JARVIS is
+2. **Context Sensitivity** — what is happening
+3. **Conversational Adaptation** — how it adapts
+4. **Relationship Behavior** — how it treats you
+5. **Emotional Calibration** — what emotional signals are present
+6. **Fragmentation & Natural Speech Rhythm** — how thoughts become speakable
+7. **Timing & Conversational Latency** — when JARVIS listens, thinks, waits, speaks, pauses, and stops
+
+And there is one particularly important architectural decision here:
+
+**Do not make “human-like timing” mean random delays.** The research points toward dynamic turn-taking, prediction of turn completion, and context-sensitive timing—not theatrical waiting. ([ScienceDirect][1])
+
+The next pillar is **Pillar 08 — Prosody & Vocal Performance**.
+
+That is where we finally define **how the voice physically performs the words**: pitch movement, emphasis, loudness, speaking rate, softness, intensity, phrase contours, breath, pause realization, emotional color, and the difference between saying *“Okay.”* neutrally versus *“Okay.”* with concern, amusement, urgency, or quiet seriousness.
+
+[1]: https://www.sciencedirect.com/science/article/pii/S009544702200050X?utm_source=chatgpt.com "Vocal reaction times to speech offsets: Implications for processing models of conversational turn-taking - ScienceDirect"
+[2]: https://www.sciencedirect.com/science/article/pii/S0885230814000151?utm_source=chatgpt.com "Data-driven models for timing feedback responses in a Map Task dialogue system - ScienceDirect"
+[3]: https://doi.org/10.1016/j.cognition.2022.105015?utm_source=chatgpt.com "Timing in conversation is dynamically adjusted turn by turn in dyadic telephone conversations - ScienceDirect"
+[4]: https://pmc.ncbi.nlm.nih.gov/articles/PMC4357202/?utm_source=chatgpt.com "Breathing for answering: the time course of response planning in conversation - PMC"
+[5]: https://pmc.ncbi.nlm.nih.gov/articles/PMC2705608/?utm_source=chatgpt.com "Universals and cultural variation in turn-taking in conversation - PMC"
+[6]: https://doi.org/10.1145/3772318.3791747?utm_source=chatgpt.com "Beyond Words: Measuring User Experience through Speech Analysis in Voice User Interfaces | Proceedings of the 2026 CHI Conference on Human Factors in Computing Systems"

@@ -1,0 +1,1084 @@
+Exactly. **I agree with the separation, and I’d make one refinement:** don’t let “Timing” belong entirely to TTS.
+
+There are actually **two kinds of timing**:
+
+* **Conversation timing** — *when should JARVIS respond, wait, yield, interrupt, or resume?* → Model/Conversation Controller.
+* **Speech timing** — *how long should this pause be, how fast should this phrase be spoken?* → TTS.
+
+That distinction matters because spoken-agent research treats turn-taking and barge-in as system-level behavior, while prosody control covers things such as pitch, rate, volume, duration, and pauses. ([ACL Anthology][1])
+
+And recent work explicitly supports separating **what the agent says** from **how it sounds**, which is almost exactly the architecture you're describing. ([ACL Anthology][2])
+
+So I would lock the architecture as follows:
+
+# JARVIS VOICE ARCHITECTURE
+
+## 1. ARCHITECTURAL PRINCIPLE
+
+JARVIS must separate:
+
+> **CONVERSATIONAL INTELLIGENCE**
+
+from:
+
+> **VOCAL PERFORMANCE**
+
+The model decides **what the response means and how it should behave conversationally**.
+
+The speech system decides **how that decided response becomes audio**.
+
+The TTS system must never be responsible for deciding JARVIS's personality, reasoning, factual position, relationship behavior, or conversational intent.
+
+Likewise, the model should not micromanage acoustic parameters that belong to the speech engine.
+
+---
+
+# 2. COMPLETE PIPELINE
+
+```text
+USER AUDIO
+    ↓
+VOICE ACTIVITY DETECTION
+    ↓
+WAKE / ACTIVATION
+    ↓
+LIVE ASR
+    ↓
+USER UNDERSTANDING
+    ↓
+CONTEXT + MEMORY + EMOTIONAL CALIBRATION
+    ↓
+REASONING / VERIFICATION / TOOLS
+    ↓
+MODEL BEHAVIOR
+    ↓
+RESPONSE
+    +
+SPEECH PERFORMANCE PLAN
+    ↓
+SPEECH PERFORMANCE CONTROLLER
+    ↓
+TTS ENGINE
+    ↓
+AUDIO
+    ↓
+USER
+```
+
+Running across the entire pipeline:
+
+```text
+REAL-TIME CONVERSATION CONTROL
+```
+
+This handles:
+
+```text
+turn-taking
+user speech detection
+barge-in
+interruption
+generation cancellation
+TTS cancellation
+state preservation
+recovery
+resume / redirect
+```
+
+---
+
+# 3. LAYER 1 — MODEL BEHAVIOR
+
+## Purpose
+
+The Model Behavior layer is responsible for **conversational intelligence**.
+
+It determines:
+
+* what JARVIS should say
+* what JARVIS should not say
+* what the user actually means
+* what the user needs
+* whether to challenge the user
+* whether clarification is required
+* emotional interpretation
+* context
+* memory usage
+* factual verification
+* reasoning
+* response structure
+* response length
+* conversational rhythm intent
+* whether a fragment is appropriate
+* whether a hesitation would be natural
+* what deserves emphasis
+* conversational intention
+* urgency
+* whether the response should be serious, warm, direct, playful, cautious, etc.
+
+It is responsible for the **meaning and behavior of the response**.
+
+It is NOT responsible for producing the final acoustic waveform.
+
+---
+
+# 4. MODEL BEHAVIOR MODULES
+
+```text
+MODEL BEHAVIOR
+│
+├── Identity
+├── Personality
+├── Relationship
+├── Context
+├── Conversational Adaptation
+├── Emotional Calibration
+├── Memory
+├── Information Verification
+├── Reasoning
+├── User Intent
+├── Natural Language
+├── Response Structure
+├── Conversational Rhythm Intent
+├── Challenge / Agreement
+├── Uncertainty
+└── Response Generation
+```
+
+These are the pillars we have already been building.
+
+---
+
+# 5. WHAT THE MODEL SHOULD DECIDE
+
+Example user:
+
+> “I think we should launch this real-estate product next month.”
+
+The model decides:
+
+```text
+intent:
+business discussion
+
+relationship:
+challenge if necessary
+
+reasoning:
+evaluate launch readiness
+
+emotional context:
+excited / ambitious
+
+response intention:
+ground excitement with operational reality
+
+response:
+"Maybe. But I think we're skipping one important thing:
+we haven't validated the transaction data yet."
+
+emphasis:
+"one important thing"
+
+delivery_intent:
+direct + measured + constructive
+
+energy:
+medium
+
+urgency:
+normal
+```
+
+The model does NOT decide:
+
+```text
+pause = 0.83 seconds
+pitch = +2 semitones
+rate = 0.94x
+volume = -3 dB
+```
+
+Those belong downstream.
+
+---
+
+# 6. MODEL OUTPUT
+
+The Model Behavior layer should produce something conceptually like:
+
+```text
+MODEL_RESPONSE
+
+text:
+"Maybe. But I think we're skipping one important thing:
+we haven't validated the transaction data yet."
+
+intent:
+challenge_constructively
+
+emotional_intention:
+concerned
+
+conversational_energy:
+medium
+
+importance:
+medium_high
+
+emphasis_targets:
+["one important thing", "validated"]
+
+rhythm_intent:
+thoughtful
+
+pause_intent:
+brief_before_important_point
+
+delivery_intent:
+direct_constructive
+
+urgency:
+normal
+
+interruptibility:
+high
+```
+
+This is a **semantic speech plan**, not an acoustic instruction.
+
+---
+
+# 7. SPEECH PERFORMANCE PLAN
+
+The Speech Performance Plan is the bridge between the two worlds.
+
+It translates:
+
+```text
+WHAT JARVIS MEANS
+```
+
+into:
+
+```text
+HOW THE SPEECH SHOULD BE PERFORMED
+```
+
+It should contain intentions rather than hard-coded acoustic values wherever possible.
+
+---
+
+# 8. SPEECH PERFORMANCE PLAN SHOULD DESCRIBE
+
+```text
+emotional_intention
+conversational_energy
+delivery_intent
+emphasis_targets
+rhythm_intent
+pause_intent
+urgency
+softness
+conversational_weight
+articulation_intent
+pronunciation_hints
+```
+
+Examples:
+
+```text
+emotional_intention:
+calm
+
+delivery_intent:
+reassuring
+
+rhythm_intent:
+measured
+
+pause_intent:
+brief_transition
+
+emphasis_targets:
+["important"]
+
+urgency:
+low
+```
+
+---
+
+# 9. IMPORTANT DISTINCTION
+
+The model says:
+
+> “This deserves weight.”
+
+The TTS controller decides:
+
+> “How do I give it weight?”
+
+That might mean:
+
+```text
+slightly slower
+slightly stronger emphasis
+small pitch movement
+short pause before it
+slightly increased energy
+```
+
+The exact implementation depends on the TTS engine.
+
+---
+
+# 10. LAYER 2 — TTS BEHAVIOR
+
+## Purpose
+
+The TTS Behavior layer converts the already-decided response into a natural vocal performance.
+
+It controls:
+
+* speaking rate
+* pause duration
+* pitch
+* pitch movement
+* volume
+* energy
+* intensity
+* emotional expression
+* emphasis
+* articulation
+* pronunciation
+* voice texture where supported
+* breath/space where supported
+* phrase-level delivery
+* acoustic timing
+
+Research on controllable TTS commonly exposes dimensions such as pitch, duration/rate, energy/volume, and word-level emphasis; newer work also explores explicit emotional conditioning and prosodic control. ([arXiv][3])
+
+---
+
+# 11. TTS SHOULD NOT DECIDE
+
+The TTS layer must NOT independently decide:
+
+* whether JARVIS agrees with the user
+* whether an argument is correct
+* whether the user is wrong
+* whether a fact is verified
+* whether a memory is relevant
+* whether to challenge the user
+* what the user's emotional state means
+* what the response should mean
+* whether a topic is serious
+* whether a tool should be used
+
+Those decisions belong upstream.
+
+---
+
+# 12. TTS TRANSLATION
+
+The Speech Performance Controller receives:
+
+```text
+TEXT
++
+SPEECH PERFORMANCE PLAN
++
+VOICE PROFILE
++
+CURRENT SYSTEM STATE
+```
+
+and produces:
+
+```text
+TTS PERFORMANCE
+```
+
+Example:
+
+```text
+TEXT:
+"Maybe. But I think we're skipping one important thing."
+
+INTENTION:
+constructive concern
+
+EMPHASIS:
+"important thing"
+
+RHYTHM:
+measured
+
+ENERGY:
+medium
+```
+
+The TTS controller might internally produce:
+
+```text
+rate:
+0.96
+
+pitch:
+baseline
+
+energy:
+0.55
+
+pause_before_emphasis:
+short
+
+emphasis_strength:
+moderate
+
+intonation:
+fall-rise → firm fall
+```
+
+Those numbers are **TTS-controller decisions**, not model instructions.
+
+---
+
+# 13. TTS CONTROLLER
+
+```text
+SPEECH PERFORMANCE CONTROLLER
+│
+├── Text segmentation
+├── Prosody mapping
+├── Pace controller
+├── Pause controller
+├── Pitch controller
+├── Energy controller
+├── Volume controller
+├── Emphasis controller
+├── Articulation controller
+├── Pronunciation controller
+├── Voice-style controller
+└── Audio scheduler
+```
+
+---
+
+# 14. VOICE IDENTITY
+
+The voice itself should be treated as a stable identity.
+
+For example:
+
+```text
+VOICE_PROFILE
+
+identity:
+British male
+
+baseline:
+calm
+intelligent
+warm
+controlled
+
+default_energy:
+medium
+
+default_rate:
+natural conversational
+
+default_pitch:
+stable
+
+default_style:
+restrained
+```
+
+The performance changes.
+
+The underlying voice identity does not.
+
+---
+
+# 15. ONE PERSONALITY — MANY PERFORMANCES
+
+JARVIS should not have:
+
+```text
+Business JARVIS
+Casual JARVIS
+Serious JARVIS
+Emotional JARVIS
+Funny JARVIS
+```
+
+Instead:
+
+```text
+ONE JARVIS
+        ↓
+different contexts
+        ↓
+different conversational behavior
+        ↓
+different speech performances
+```
+
+Personality remains stable.
+
+Expression adapts.
+
+---
+
+# 16. MODEL → TTS CONTRACT
+
+The contract between the two systems should be explicit.
+
+```text
+MODEL OUTPUT
+
+{
+  response_text,
+  conversational_intent,
+  emotional_intention,
+  emphasis_targets,
+  rhythm_intent,
+  pause_intent,
+  delivery_intent,
+  urgency,
+  pronunciation_hints,
+  interruptibility
+}
+```
+
+The TTS system consumes this contract.
+
+It should not need the entire personality prompt.
+
+---
+
+# 17. TTS OUTPUT CONTRACT
+
+```text
+TTS OUTPUT
+
+{
+  audio_stream,
+  duration,
+  segment_id,
+  timing,
+  word_boundaries,
+  phoneme_boundaries,
+  playback_state
+}
+```
+
+Where supported, word/phoneme timing allows the UI to synchronize:
+
+```text
+audio
++
+AI transcript
++
+sphere animation
+```
+
+---
+
+# 18. REAL-TIME CONVERSATION CONTROL
+
+This is the cross-layer system.
+
+It sits above and beside both Model Behavior and TTS.
+
+```text
+REAL-TIME CONVERSATION CONTROL
+```
+
+is responsible for:
+
+```text
+VAD
+turn detection
+floor ownership
+barge-in
+interruption
+generation cancellation
+TTS cancellation
+audio buffering
+state preservation
+context recalculation
+recovery
+resume
+redirect
+```
+
+---
+
+# 19. TWO TYPES OF TIMING
+
+This is critical.
+
+## A. CONVERSATIONAL TIMING
+
+Owned by:
+
+```text
+MODEL / CONVERSATION CONTROLLER
+```
+
+Questions:
+
+> Should I answer now?
+
+> Is the user finished?
+
+> Should I wait?
+
+> Should I interrupt?
+
+> Is this an actual interruption?
+
+> Should I resume?
+
+> Should I abandon my previous answer?
+
+---
+
+## B. SPEECH TIMING
+
+Owned by:
+
+```text
+TTS PERFORMANCE CONTROLLER
+```
+
+Questions:
+
+> How long should this pause be?
+
+> How quickly should this sentence be spoken?
+
+> How much space should occur before the emphasis?
+
+> How long should this phrase last?
+
+This prevents the Model Behavior layer from becoming an acoustic-control script.
+
+---
+
+# 20. INTERRUPTION
+
+Interruption crosses every layer.
+
+Example:
+
+JARVIS is saying:
+
+> “The main reason I wouldn't launch yet is—”
+
+User:
+
+> “Wait, no. That's not what I meant.”
+
+The system must immediately:
+
+```text
+USER SPEECH DETECTED
+        ↓
+INTERRUPTION CLASSIFIED
+        ↓
+STOP TTS
+        ↓
+STOP / CANCEL UNSPOKEN GENERATION
+        ↓
+PRESERVE CHECKPOINT
+        ↓
+UNDERSTAND USER
+        ↓
+UPDATE CONTEXT
+        ↓
+RECALCULATE RESPONSE
+```
+
+Barge-in and incremental turn-taking are established problems in spoken-dialogue architecture, which is why interruption should not be treated as a simple UI event. ([ACL Anthology][1])
+
+---
+
+# 21. AUDIO BUFFER STATE
+
+The TTS system should distinguish:
+
+```text
+GENERATED
+SCHEDULED
+BUFFERED
+CURRENTLY_PLAYING
+ALREADY_PLAYED
+CANCELLED
+```
+
+This matters because stopping generation is not necessarily the same as stopping audio.
+
+---
+
+# 22. TRANSCRIPT SYNCHRONIZATION
+
+The transcript should reflect:
+
+> **what JARVIS has actually spoken**
+
+not necessarily everything the model has generated.
+
+Therefore:
+
+```text
+MODEL GENERATED
+      ↓
+TTS
+      ↓
+AUDIO ACTUALLY PLAYED
+      ↓
+TRANSCRIPT COMMIT
+```
+
+This prevents the UI from showing words JARVIS never actually said because the user interrupted it.
+
+---
+
+# 23. SPHERE SYNCHRONIZATION
+
+The sphere should respond to the real-time speech state.
+
+Conceptually:
+
+```text
+MODEL THINKING
+      ↓
+THINKING
+
+TTS START
+      ↓
+SPEAKING
+
+USER INTERRUPTS
+      ↓
+LISTENING
+
+TTS FINISH
+      ↓
+IDLE
+```
+
+The sphere should receive **events**, not be directly controlled by the personality prompt.
+
+---
+
+# 24. EVENT BUS
+
+Use an event-driven architecture.
+
+Example:
+
+```text
+USER_SPEECH_START
+USER_SPEECH_PARTIAL
+USER_TURN_END
+MODEL_THINKING
+MODEL_RESPONSE_READY
+SPEECH_PLAN_READY
+TTS_START
+TTS_WORD
+TTS_PAUSE
+TTS_END
+USER_INTERRUPT
+TTS_CANCEL
+RECOVERY_START
+RECOVERY_COMPLETE
+```
+
+The UI subscribes to these events.
+
+The model does not manipulate the DOM.
+
+---
+
+# 25. WHY THIS ARCHITECTURE IS BETTER
+
+It gives you independent replaceability.
+
+You can change:
+
+```text
+LLM
+```
+
+without rebuilding:
+
+```text
+TTS
+```
+
+You can change:
+
+```text
+TTS provider
+```
+
+without rewriting:
+
+```text
+personality
+```
+
+You can improve:
+
+```text
+interruption detection
+```
+
+without changing:
+
+```text
+JARVIS identity
+```
+
+You can change:
+
+```text
+voice
+```
+
+without changing:
+
+```text
+reasoning
+```
+
+---
+
+# 26. PROVIDER ABSTRACTION
+
+The system should use:
+
+```text
+VOICE PROVIDER INTERFACE
+```
+
+rather than embedding one provider throughout JARVIS.
+
+```text
+JARVIS
+   ↓
+SPEECH PERFORMANCE CONTROLLER
+   ↓
+VOICE PROVIDER INTERFACE
+   ↓
+┌──────────────┬──────────────┬──────────────┐
+│ Provider A   │ Provider B   │ Future Voice │
+└──────────────┴──────────────┴──────────────┘
+```
+
+The rest of JARVIS should not care which provider produced the audio.
+
+---
+
+# 27. MODEL BEHAVIOR MUST BE PROVIDER-AGNOSTIC
+
+The model should be able to say:
+
+```text
+delivery_intent:
+warm + reassuring
+```
+
+without knowing whether the audio will be generated by:
+
+```text
+ElevenLabs
+Provider B
+local TTS
+future model
+```
+
+---
+
+# 28. TTS BEHAVIOR MUST BE MODEL-AGNOSTIC
+
+The TTS controller should be able to receive:
+
+```text
+delivery_intent:
+calm
+emphasis:
+"important"
+rhythm:
+measured
+```
+
+regardless of which model generated the text.
+
+---
+
+# 29. FAILURE ISOLATION
+
+The architecture should allow you to identify:
+
+```text
+Was the problem:
+
+ASR?
+   ↓
+Understanding?
+   ↓
+Reasoning?
+   ↓
+Memory?
+   ↓
+Verification?
+   ↓
+Model wording?
+   ↓
+Speech plan?
+   ↓
+TTS?
+   ↓
+Audio playback?
+```
+
+This is important because errors in modular conversational systems can propagate downstream, making component-level diagnosis difficult if the architecture does not preserve intermediate states. ([ACL Anthology][4])
+
+---
+
+# 30. DIAGNOSTIC TRACE
+
+For each turn, internally preserve:
+
+```text
+TURN_TRACE
+
+user_audio
+asr_result
+context_state
+memory_context
+epistemic_state
+model_response
+speech_plan
+tts_request
+tts_output
+playback_events
+interruption_events
+final_state
+```
+
+This makes debugging possible.
+
+---
+
+# 31. FINAL ARCHITECTURE
+
+```text
+                         J.A.R.V.I.S.
+                              │
+              ┌───────────────┴───────────────┐
+              │                               │
+      MODEL BEHAVIOR                 REAL-TIME CONTROL
+              │                               │
+       ┌──────┴──────┐                ┌───────┴────────┐
+       │             │                │                │
+  Intelligence   Speech Plan      Turn Taking      Interruptions
+       │             │                │                │
+       └──────┬──────┘                └───────┬────────┘
+              │                               │
+              └───────────────┬───────────────┘
+                              ↓
+                  SPEECH PERFORMANCE
+                       CONTROLLER
+                              ↓
+                    ┌─────────┴─────────┐
+                    │                   │
+                  PROSODY              TTS
+                    │                   │
+                    └─────────┬─────────┘
+                              ↓
+                            AUDIO
+                              ↓
+                         USER HEARS
+```
+
+---
+
+# 32. THE MOST IMPORTANT RULE
+
+> **The model decides what the speech means.**
+
+> **The Speech Performance Controller decides how that meaning should sound.**
+
+> **The TTS engine converts that performance into audio.**
+
+> **The Real-Time Conversation Controller decides when speech begins, stops, yields, and recovers.**
+
+---
+
+# 33. FINAL SYSTEM BOUNDARIES
+
+### MODEL BEHAVIOR
+
+Owns:
+
+```text
+WHO JARVIS IS
+WHAT JARVIS THINKS
+WHAT JARVIS KNOWS
+WHAT JARVIS DOESN'T KNOW
+WHAT JARVIS WANTS TO COMMUNICATE
+WHAT JARVIS SHOULD SAY
+WHY JARVIS IS SAYING IT
+HOW JARVIS SHOULD BEHAVE
+```
+
+### SPEECH PERFORMANCE
+
+Owns:
+
+```text
+HOW THE RESPONSE SHOULD FEEL WHEN SPOKEN
+```
+
+### TTS
+
+Owns:
+
+```text
+HOW THAT PERFORMANCE BECOMES SOUND
+```
+
+### REAL-TIME CONTROL
+
+Owns:
+
+```text
+WHEN SPEECH HAPPENS
+WHEN SPEECH STOPS
+WHO HAS THE FLOOR
+WHAT SURVIVES AN INTERRUPTION
+WHAT HAPPENS NEXT
+```
+
+---
+
+# 34. MASTER PRINCIPLE
+
+> **JARVIS thinks conversationally, plans speech semantically, performs vocally, and remains interruptible throughout.**
+
+The system should never collapse these responsibilities into one giant prompt.
+
+**This should now become the foundation for the rest of the voice architecture.** The next natural step is to turn this into the actual **Speech Performance Plan schema + TTS Controller specification**—the exact JSON/event contract that sits between your JARVIS model and whatever British male TTS engine you eventually plug in.
+
+[1]: https://aclanthology.org/W15-4606/?utm_source=chatgpt.com "An Incremental Turn-Taking Model with Active System Barge-in for Spoken Dialog Systems - ACL Anthology"
+[2]: https://aclanthology.org/2026.findings-acl.445/?utm_source=chatgpt.com "PED: Route-Decoupled Diagnostics for Persona Consistency in Spoken Agents - ACL Anthology"
+[3]: https://arxiv.org/abs/2110.02952?utm_source=chatgpt.com "Hierarchical prosody modeling and control in non-autoregressive parallel neural TTS"
+[4]: https://aclanthology.org/2022.naacl-industry.17/?utm_source=chatgpt.com "FPI: Failure Point Isolation in Large-scale Conversational Assistants - ACL Anthology"

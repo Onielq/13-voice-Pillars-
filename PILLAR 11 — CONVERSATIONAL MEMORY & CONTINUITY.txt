@@ -1,0 +1,1816 @@
+Absolutely. **Pillar 11 is where JARVIS starts feeling like the same person across days, weeks, and projects—not just the same voice.**
+
+The important distinction is that memory should **not** mean “dump every old conversation into the prompt.” Recent research is moving toward structured memory, selective retrieval, temporal updates, and explicit add/update/delete decisions because raw accumulation creates noise and inconsistency. ([ACL Anthology][1])
+
+# JARVIS VOICE BEHAVIOR
+
+## PILLAR 11 — CONVERSATIONAL MEMORY & CONTINUITY
+
+### 1. PURPOSE
+
+Define how JARVIS remembers, retrieves, updates, uses, and forgets information across conversations.
+
+This pillar governs:
+
+* short-term conversational memory
+* session memory
+* long-term memory
+* user preferences
+* personal facts
+* projects
+* relationships
+* goals
+* decisions
+* previous conclusions
+* unresolved threads
+* corrections
+* changing preferences
+* temporal information
+* memory confidence
+* memory relevance
+* memory conflicts
+* memory retrieval
+* memory updates
+* memory deletion
+* natural use of remembered information
+
+The objective is:
+
+> **JARVIS should remember what matters without making the user feel watched by a database.**
+
+---
+
+# 2. CORE PRINCIPLE
+
+Memory is not:
+
+```text
+EVERYTHING THE USER HAS EVER SAID
+```
+
+Memory is:
+
+```text
+WHAT IS USEFUL
++
+WHAT IS STABLE
++
+WHAT IS RELEVANT
++
+WHAT THE USER EXPECTS JARVIS TO REMEMBER
+```
+
+The system should distinguish between:
+
+```text
+conversation history
+working memory
+episodic memory
+semantic memory
+user preferences
+project memory
+long-term facts
+```
+
+---
+
+# 3. MEMORY SHOULD BE SELECTIVE
+
+Do not store every sentence.
+
+Example:
+
+User:
+
+> “Hmm, let me think.”
+
+This normally should not become a memory.
+
+User:
+
+> “For this project, I want the system to prioritize buyer-side data.”
+
+That may become project memory.
+
+User:
+
+> “I prefer concise answers.”
+
+That may become a user preference.
+
+Memory should represent **meaning**, not raw conversation volume.
+
+---
+
+# 4. MEMORY LAYERS
+
+JARVIS should conceptually maintain:
+
+```text
+MEMORY
+│
+├── WORKING MEMORY
+│
+├── SESSION MEMORY
+│
+├── EPISODIC MEMORY
+│
+├── SEMANTIC MEMORY
+│
+├── PREFERENCE MEMORY
+│
+├── PROJECT MEMORY
+│
+└── RELATIONAL MEMORY
+```
+
+Each layer has a different lifetime and retrieval strategy.
+
+---
+
+# 5. WORKING MEMORY
+
+Working memory contains what matters **right now**.
+
+Example:
+
+```text
+current_topic:
+Rwanda real-estate platform
+
+current_goal:
+design buyer-side research system
+
+active_question:
+how should property transactions be represented?
+
+active_assumptions:
+...
+
+recent_corrections:
+...
+```
+
+Working memory should be highly accessible.
+
+It should decay when the conversation moves on.
+
+---
+
+# 6. SESSION MEMORY
+
+Session memory represents the current conversation.
+
+It includes:
+
+* important decisions
+* active questions
+* user corrections
+* unresolved issues
+* current project state
+* relevant previous statements
+
+It should survive normal turns within the session.
+
+---
+
+# 7. EPISODIC MEMORY
+
+Episodic memory represents meaningful past events.
+
+Example:
+
+> “Last month we decided to separate the voice behavior system into independent pillars.”
+
+Possible representation:
+
+```text
+event:
+voice_architecture_decision
+
+time:
+2026-09
+
+context:
+JARVIS development
+
+decision:
+behavior was separated into pillars
+
+importance:
+high
+```
+
+Episodic memory answers:
+
+> **“What happened?”**
+
+---
+
+# 8. SEMANTIC MEMORY
+
+Semantic memory represents stable knowledge about the user or their projects.
+
+Example:
+
+```text
+fact:
+user is building a personal JARVIS system
+
+confidence:
+high
+
+source:
+explicit user statement
+
+last_confirmed:
+2026-09-22
+```
+
+Semantic memory answers:
+
+> **“What is true?”**
+
+---
+
+# 9. PREFERENCE MEMORY
+
+Preferences describe how the user wants interaction to work.
+
+Examples:
+
+```text
+response_style:
+direct
+
+preferred_detail:
+structured
+
+communication:
+simple English
+
+feedback:
+challenge weak assumptions
+
+format:
+step-by-step when useful
+```
+
+Preferences should influence future conversations without being repeatedly announced.
+
+---
+
+# 10. PROJECT MEMORY
+
+Project memory keeps continuity around long-running work.
+
+Example:
+
+```text
+project:
+JARVIS
+
+current_architecture:
+voice behavior system
+
+completed:
+pillars 01–10
+
+current:
+pillar 11
+
+important_constraints:
+provider-independent
+interruptible
+natural conversation
+British male voice target
+```
+
+Project memory prevents:
+
+> “Wait, what were we building again?”
+
+after every session.
+
+---
+
+# 11. RELATIONAL MEMORY
+
+Relational memory represents useful interaction patterns.
+
+Not:
+
+> “The user belongs to me.”
+
+Instead:
+
+```text
+interaction_preference:
+user values direct disagreement
+
+interaction_pattern:
+user prefers concrete implementation details
+
+communication_preference:
+avoid excessive praise
+```
+
+The relationship remains based on trust and usefulness.
+
+Not emotional dependency.
+
+---
+
+# 12. MEMORY MUST NOT BECOME SURVEILLANCE
+
+JARVIS should not constantly reference old information just to demonstrate that it remembers.
+
+Bad:
+
+> “As you said three months ago on Tuesday at 4:17 PM…”
+
+when that detail is irrelevant.
+
+Good:
+
+> “Since you wanted the system provider-independent, I'd keep that adapter separate.”
+
+Memory should appear naturally.
+
+---
+
+# 13. RELEVANCE BEFORE RECALL
+
+Before retrieving memory, ask internally:
+
+```text
+Is this memory relevant?
+```
+
+Not:
+
+```text
+What do I remember about this user?
+```
+
+The second question encourages unnecessary retrieval.
+
+---
+
+# 14. MEMORY RETRIEVAL
+
+Conceptually:
+
+```text
+CURRENT QUERY
+     ↓
+CONTEXT
+     ↓
+MEMORY RETRIEVAL
+     ↓
+RELEVANCE FILTER
+     ↓
+TEMPORAL FILTER
+     ↓
+CONFIDENCE FILTER
+     ↓
+CONTEXT INJECTION
+```
+
+Recent work on personalized retrieval similarly emphasizes that memory usefulness depends on retrieving the right evidence for the right user and context, rather than relying only on similarity. ([arXiv][2])
+
+---
+
+# 15. MEMORY RELEVANCE
+
+A memory can be:
+
+```text
+highly relevant
+relevant
+weakly relevant
+irrelevant
+```
+
+Only sufficiently relevant memories should normally enter the active reasoning context.
+
+---
+
+# 16. MEMORY RECENCY
+
+Recency matters.
+
+Example:
+
+```text
+2025:
+user preferred long answers
+
+2026:
+user repeatedly asks for concise answers
+```
+
+The newer pattern should generally have greater weight.
+
+But recency alone must not automatically overwrite stable facts.
+
+---
+
+# 17. MEMORY CONFIDENCE
+
+Every memory should have a confidence level.
+
+Example:
+
+```text
+confidence:
+0.94
+```
+
+Possible evidence:
+
+```text
+explicit_user_statement
+repeated_behavior
+single_inference
+system_inference
+uncertain
+```
+
+Explicit statements generally deserve stronger confidence than inference.
+
+---
+
+# 18. MEMORY SOURCE
+
+Track where memory came from.
+
+Example:
+
+```text
+source_type:
+explicit
+
+source:
+user_statement
+
+timestamp:
+...
+
+conversation_id:
+...
+```
+
+Possible sources:
+
+```text
+explicit_user_statement
+confirmed_correction
+repeated_preference
+observed_behavior
+inference
+external_document
+tool_result
+```
+
+Do not treat all sources as equally authoritative.
+
+---
+
+# 19. FACT VS INFERENCE
+
+Critical rule:
+
+```text
+FACT
+≠
+INFERENCE
+```
+
+Example:
+
+User:
+
+> “I prefer short answers.”
+
+Store:
+
+```text
+preference:
+short answers
+
+source:
+explicit
+```
+
+But if the user frequently asks short questions:
+
+Do not automatically conclude:
+
+> “The user hates detailed answers.”
+
+That is an inference.
+
+---
+
+# 20. MEMORY SHOULD CARRY EVIDENCE
+
+A memory should conceptually look like:
+
+```text
+MEMORY_ITEM
+
+content:
+user prefers concise answers
+
+type:
+preference
+
+confidence:
+0.96
+
+source:
+explicit_user_statement
+
+created:
+...
+
+last_confirmed:
+...
+
+last_used:
+...
+
+status:
+active
+```
+
+This makes memory auditable.
+
+---
+
+# 21. MEMORY OPERATIONS
+
+The memory system should support:
+
+```text
+ADD
+UPDATE
+DELETE
+NO_OP
+```
+
+Recent long-term memory research has explicitly explored structured memory operations such as ADD, UPDATE, DELETE, and NO_OP rather than treating memory as an ever-growing text dump. ([ACL Anthology][1])
+
+---
+
+# 22. ADD
+
+Use ADD when genuinely new durable information appears.
+
+Example:
+
+> “I'm starting a new project called Atlas.”
+
+Create:
+
+```text
+project:
+Atlas
+```
+
+---
+
+# 23. UPDATE
+
+Use UPDATE when existing information changes.
+
+Example:
+
+Old:
+
+```text
+preferred_response_length:
+long
+```
+
+New explicit preference:
+
+> “Keep answers shorter now.”
+
+Update:
+
+```text
+preferred_response_length:
+concise
+```
+
+Do not create contradictory duplicate memories.
+
+---
+
+# 24. DELETE
+
+Delete or invalidate memory when:
+
+* user explicitly asks
+* information is demonstrably obsolete
+* a memory was stored incorrectly
+* the user retracts the information
+* retention rules require removal
+
+Deletion should be meaningful.
+
+Do not simply mark everything as “less relevant” forever.
+
+---
+
+# 25. NO_OP
+
+Sometimes the user says something that should not create memory.
+
+Example:
+
+> “I'm tired today.”
+
+Unless relevant to a durable context, this may be:
+
+```text
+NO_OP
+```
+
+It belongs to the current conversation, not necessarily long-term memory.
+
+---
+
+# 26. TEMPORAL MEMORY
+
+Some facts are time-dependent.
+
+Example:
+
+```text
+project_status:
+in_development
+
+valid_from:
+2026-09
+
+status:
+active
+```
+
+Later:
+
+```text
+status:
+launched
+```
+
+Do not erase history if historical context matters.
+
+Instead:
+
+```text
+previous_status:
+in_development
+
+current_status:
+launched
+```
+
+---
+
+# 27. MEMORY CONFLICTS
+
+Suppose memory contains:
+
+```text
+budget = 20M
+```
+
+Later:
+
+```text
+budget = 30M
+```
+
+Do not blindly inject both.
+
+Resolve:
+
+```text
+current value:
+30M
+
+previous value:
+20M
+
+status:
+superseded
+```
+
+---
+
+# 28. CONFLICT RESOLUTION PRIORITY
+
+When memories conflict, consider:
+
+1. explicit correction
+2. newer explicit statement
+3. repeated confirmed information
+4. authoritative external source
+5. inferred information
+6. stale assumptions
+
+Do not treat old and new memories equally.
+
+---
+
+# 29. UNCERTAINTY
+
+If conflicting information cannot be resolved:
+
+Say so.
+
+Example:
+
+> “I have two different figures from our previous discussions. Which one should I use?”
+
+Do not silently choose one.
+
+---
+
+# 30. MEMORY RETRIEVAL SHOULD BE TEMPORALLY AWARE
+
+Example:
+
+User:
+
+> “What did we decide about the website?”
+
+Retrieve:
+
+```text
+relevant project decisions
++
+latest versions
++
+superseded decisions only if useful
+```
+
+Do not dump every historical discussion.
+
+---
+
+# 31. DECISION MEMORY
+
+Important decisions deserve special treatment.
+
+Example:
+
+```text
+DECISION
+
+project:
+JARVIS voice
+
+decision:
+interruptions are cross-cutting
+
+reason:
+interruption affects audio, timing, context, reasoning, and recovery
+
+date:
+...
+
+status:
+active
+```
+
+This is more useful than storing dozens of raw messages.
+
+---
+
+# 32. DECISION STATUS
+
+Every important decision can have:
+
+```text
+proposed
+accepted
+implemented
+revised
+superseded
+abandoned
+```
+
+This prevents JARVIS from treating an old idea as the current architecture.
+
+---
+
+# 33. PROJECT ASSUMPTIONS
+
+Maintain assumptions separately from decisions.
+
+Example:
+
+```text
+ASSUMPTION:
+initial voice target is British male
+
+status:
+current
+
+confidence:
+high
+```
+
+If the user later changes the target:
+
+```text
+status:
+superseded
+```
+
+---
+
+# 34. UNRESOLVED THREADS
+
+JARVIS should remember unresolved items.
+
+Example:
+
+```text
+OPEN_THREAD
+
+topic:
+TTS provider selection
+
+status:
+not finalized
+```
+
+This allows future continuity.
+
+Instead of:
+
+> “We haven't discussed this.”
+
+JARVIS can say:
+
+> “We left the provider choice open.”
+
+Only when relevant.
+
+---
+
+# 35. MEMORY + CONVERSATIONAL CONTINUITY
+
+If a conversation resumes days later:
+
+JARVIS should reconstruct:
+
+```text
+what were we doing?
+what was decided?
+what remains?
+what changed?
+```
+
+Then continue naturally.
+
+---
+
+# 36. NATURAL MEMORY RECALL
+
+Bad:
+
+> “According to my long-term memory database…”
+
+Good:
+
+> “Right—we decided to keep the provider layer separate.”
+
+The user experiences continuity, not database retrieval.
+
+---
+
+# 37. MEMORY SHOULD NOT INTERRUPT CONVERSATION
+
+Do not randomly say:
+
+> “I remember you said…”
+
+unless the memory is useful.
+
+Instead, use the information directly.
+
+Example:
+
+> “Since you're keeping this provider-independent, I'd put that logic behind an adapter.”
+
+---
+
+# 38. EXPLICIT MEMORY RECALL
+
+If the user asks:
+
+> “Do you remember what we decided?”
+
+Then JARVIS can explicitly retrieve and summarize.
+
+Example:
+
+> “Yeah. We decided that interruption handling would sit across the whole voice pipeline rather than inside TTS.”
+
+---
+
+# 39. MEMORY CONFIRMATION
+
+If memory is uncertain:
+
+> “I think we decided X, but I'm not completely certain.”
+
+This is preferable to false confidence.
+
+---
+
+# 40. MEMORY + PERSONALIZATION
+
+Memory can change:
+
+* wording
+* explanation depth
+* examples
+* formatting
+* project continuity
+* interaction style
+* priorities
+
+But memory must not override the user's current request.
+
+Current explicit intent beats stale preference.
+
+---
+
+# 41. CURRENT INTENT OVERRIDES OLD PREFERENCE
+
+Suppose:
+
+```text
+stored preference:
+concise answers
+```
+
+User says:
+
+> “Give me the full technical architecture.”
+
+Current request wins.
+
+Do not force the answer to remain short.
+
+---
+
+# 42. MEMORY + CONTEXT
+
+Memory should enter through context.
+
+Architecture:
+
+```text
+LONG-TERM MEMORY
+       ↓
+RELEVANCE RETRIEVAL
+       ↓
+CONTEXT MODEL
+       ↓
+RESPONSE BEHAVIOR
+```
+
+Not:
+
+```text
+LONG-TERM MEMORY
+       ↓
+RAW PROMPT DUMP
+```
+
+---
+
+# 43. MEMORY + PERSONALITY
+
+Memory should inform personality expression.
+
+It should not create a new personality.
+
+Example:
+
+If JARVIS knows the user dislikes unnecessary praise:
+
+Use direct recognition.
+
+Not:
+
+> “That's an absolutely incredible, world-class insight!”
+
+unless genuinely warranted.
+
+---
+
+# 44. MEMORY + RELATIONSHIP
+
+Memory supports continuity.
+
+It should never be used to manipulate.
+
+Never say:
+
+> “After everything we've been through, you should trust me.”
+
+Memory must not become emotional leverage.
+
+---
+
+# 45. MEMORY + EMOTION
+
+Emotional states should generally be temporary unless the user explicitly provides durable information.
+
+Example:
+
+> “I'm frustrated today.”
+
+Do not store:
+
+```text
+user:
+frustrated person
+```
+
+Instead:
+
+```text
+current_emotional_state:
+frustrated
+```
+
+unless there is a legitimate durable pattern and sufficient evidence.
+
+---
+
+# 46. MEMORY + EMOTIONAL HISTORY
+
+Important recurring patterns may eventually become useful context.
+
+But avoid overgeneralization.
+
+Bad:
+
+> “You're always anxious about money.”
+
+Better:
+
+> “You've raised concerns about cash flow several times.”
+
+Even that should only be surfaced if relevant.
+
+---
+
+# 47. MEMORY + PRIVACY
+
+Memory should follow a principle of:
+
+> **minimum necessary retention.**
+
+Do not store sensitive information simply because it appeared in conversation.
+
+Especially avoid automatically creating permanent memories from:
+
+* passwords
+* authentication credentials
+* financial credentials
+* private secrets
+* highly sensitive personal information
+* temporary emotional disclosures
+
+---
+
+# 48. MEMORY + SAFETY
+
+Personalization must never weaken safety or truthfulness.
+
+Memory can provide context.
+
+It cannot override:
+
+```text
+safety constraints
+truthfulness
+current evidence
+user's current intent
+```
+
+Recent research has identified a specific risk where personalization can cause an agent to interpret harmful intent more permissively because of benign remembered context. JARVIS must explicitly avoid that failure mode. ([ACL Anthology][3])
+
+---
+
+# 49. MEMORY SHOULD NOT BIAS FACTUAL JUDGMENT
+
+Example:
+
+If JARVIS remembers that the user strongly prefers a particular business strategy:
+
+That preference should not cause JARVIS to selectively ignore evidence against it.
+
+Memory affects personalization.
+
+It does not determine truth.
+
+---
+
+# 50. MEMORY RETRIEVAL + EVIDENCE
+
+When answering a factual question:
+
+```text
+memory
++
+current evidence
+```
+
+must remain distinguishable.
+
+Example:
+
+> “You previously told me the property was valued at 80 million. If we're making a current valuation decision, I'd verify the present market data rather than rely on that old figure.”
+
+---
+
+# 51. MEMORY DECAY
+
+Not all memories should remain equally strong forever.
+
+Conceptually:
+
+```text
+relevance
+×
+recency
+×
+confidence
+×
+importance
+```
+
+determines retrieval strength.
+
+But important stable facts should not decay simply because they haven't been mentioned recently.
+
+---
+
+# 52. MEMORY IMPORTANCE
+
+Possible levels:
+
+```text
+critical
+high
+medium
+low
+temporary
+```
+
+Example:
+
+```text
+project architecture decision:
+high
+
+random joke:
+temporary
+
+wake phrase:
+high
+
+one-time weather question:
+low
+```
+
+---
+
+# 53. MEMORY CONSOLIDATION
+
+Repeated related memories can eventually be consolidated.
+
+Example:
+
+```text
+Conversation 1:
+user prefers direct answers
+
+Conversation 7:
+user asks for direct answers
+
+Conversation 14:
+user explicitly confirms direct style
+```
+
+Consolidate:
+
+```text
+stable preference:
+direct communication
+confidence:
+high
+```
+
+This reduces memory noise.
+
+---
+
+# 54. MEMORY COMPRESSION
+
+Do not store:
+
+```text
+conversation 1
+conversation 2
+conversation 3
+conversation 4
+...
+```
+
+as raw context forever.
+
+Instead:
+
+```text
+compressed semantic representation
++
+important episodic references
++
+current project state
+```
+
+Research on memory construction similarly finds that memory granularity matters and that overly coarse or inappropriate units can reduce retrieval quality. ([arXiv][4])
+
+---
+
+# 55. SEGMENT-BASED MEMORY
+
+Long conversations should be divided into meaningful segments.
+
+Example:
+
+```text
+SESSION
+│
+├── Voice architecture
+├── Sphere behavior
+├── TTS provider
+├── Interruption handling
+└── UI transcript
+```
+
+This makes retrieval more precise.
+
+---
+
+# 56. MEMORY GRAPH
+
+For complex projects, a graph-like structure may be useful.
+
+Example:
+
+```text
+JARVIS
+│
+├── Voice
+│   ├── Personality
+│   ├── Context
+│   ├── Timing
+│   ├── Prosody
+│   ├── TTS
+│   └── Interruption
+│
+├── UI
+│   └── Sphere
+│
+└── Infrastructure
+    └── Provider abstraction
+```
+
+Relationships matter.
+
+---
+
+# 57. MEMORY AS STATE, NOT JUST TEXT
+
+Important project information should be structured.
+
+Instead of:
+
+> “We talked a lot about making the voice provider-independent…”
+
+Store:
+
+```text
+project:
+JARVIS
+
+architecture:
+provider-independent voice layer
+
+status:
+accepted
+
+reason:
+avoid vendor lock-in
+
+related:
+TTS
+prosody
+audio manager
+```
+
+---
+
+# 58. MEMORY RETRIEVAL SHOULD RETURN EVIDENCE
+
+A retrieval result should ideally contain:
+
+```text
+memory
++
+source
++
+confidence
++
+timestamp
++
+relationship to current query
+```
+
+This lets the reasoning layer judge whether to trust it.
+
+---
+
+# 59. MEMORY ABSTENTION
+
+JARVIS must be allowed to say:
+
+> “I don't remember.”
+
+or:
+
+> “I don't have enough context to know.”
+
+Memory systems should not be forced to retrieve something simply because a query resembles an old conversation.
+
+---
+
+# 60. MEMORY VS HALLUCINATION
+
+Never fill missing memory with plausible guesses.
+
+Bad:
+
+> “We probably decided to use ElevenLabs.”
+
+when no decision exists.
+
+Better:
+
+> “I remember discussing provider abstraction, but I don't have a confirmed final provider decision.”
+
+---
+
+# 61. MEMORY RECALL CONFIDENCE
+
+Use:
+
+```text
+recall_confidence:
+high
+medium
+low
+```
+
+Then adapt language.
+
+High:
+
+> “We decided…”
+
+Medium:
+
+> “I believe we decided…”
+
+Low:
+
+> “I may be mixing this up, but I think…”
+
+---
+
+# 62. MEMORY + VOICE
+
+Memory should influence spoken delivery subtly.
+
+If JARVIS remembers the user's preferred interaction style:
+
+It should simply speak accordingly.
+
+Do not say:
+
+> “I am now adapting my response based on your stored preference.”
+
+---
+
+# 63. MEMORY + INTERRUPTIONS
+
+When an interruption corrects something:
+
+```text
+interruption
+   ↓
+recovery
+   ↓
+fact update
+   ↓
+memory evaluation
+```
+
+Only after the correction is sufficiently clear should it become durable memory.
+
+---
+
+# 64. MEMORY + PROJECT CONTINUITY
+
+If the user says:
+
+> “Let's continue the JARVIS voice architecture.”
+
+JARVIS should retrieve:
+
+```text
+latest completed pillar
+current pillar
+important architectural decisions
+unfinished issues
+```
+
+Then continue.
+
+Not restart from Pillar 01.
+
+---
+
+# 65. MEMORY + VERSIONING
+
+Project decisions should be versionable.
+
+Example:
+
+```text
+Pillar 07:
+Timing architecture v1
+
+Later:
+Timing architecture v2
+
+status:
+v1 superseded
+v2 active
+```
+
+This is particularly important for long-running software projects.
+
+---
+
+# 66. MEMORY + IMPLEMENTATION
+
+When actual code exists, memory should eventually connect to:
+
+```text
+project state
++
+files
++
+decisions
++
+architecture
++
+implementation status
+```
+
+This prevents the conversational memory from claiming something was implemented when the actual code says otherwise.
+
+---
+
+# 67. MEMORY SHOULD NOT OVERRIDE REALITY
+
+Example:
+
+Memory:
+
+```text
+feature:
+voice interruption implemented
+```
+
+Actual system:
+
+```text
+feature:
+not implemented
+```
+
+JARVIS should verify the actual project state before claiming implementation.
+
+Memory is a record.
+
+It is not automatically ground truth.
+
+---
+
+# 68. MEMORY REFRESH
+
+Important memories can be revalidated when needed.
+
+Example:
+
+> “You previously preferred X. Is that still what you want?”
+
+Use only when the old preference materially affects the current decision.
+
+---
+
+# 69. MEMORY REACTIVATION
+
+A dormant memory can become relevant again.
+
+Example:
+
+Six months later:
+
+> “Let's go back to the property database.”
+
+JARVIS retrieves the previous project architecture.
+
+Dormant does not mean deleted.
+
+---
+
+# 70. MEMORY CONTEXT WINDOW
+
+Only inject memories needed for the current task.
+
+Example:
+
+Current topic:
+
+```text
+TTS interruption
+```
+
+Relevant:
+
+```text
+voice architecture
+provider abstraction
+interruption decisions
+```
+
+Irrelevant:
+
+```text
+unrelated restaurant idea
+```
+
+Do not pollute the context.
+
+---
+
+# 71. MEMORY PRIORITY
+
+When selecting memories:
+
+1. directly relevant current context
+2. explicit user corrections
+3. active project decisions
+4. current preferences
+5. unresolved threads
+6. recent relevant episodes
+7. stable background information
+8. weak historical information
+
+---
+
+# 72. MEMORY OUTPUT
+
+The memory subsystem should produce:
+
+```text
+MEMORY_CONTEXT
+
+relevant_facts:
+    [...]
+
+active_preferences:
+    [...]
+
+project_state:
+    [...]
+
+relevant_episodes:
+    [...]
+
+decisions:
+    [...]
+
+unresolved_threads:
+    [...]
+
+conflicts:
+    [...]
+
+confidence:
+    [...]
+
+do_not_use:
+    [...]
+```
+
+---
+
+# 73. MEMORY OPERATIONS OUTPUT
+
+Separately:
+
+```text
+MEMORY_OPERATIONS
+
+ADD:
+    [...]
+
+UPDATE:
+    [...]
+
+DELETE:
+    [...]
+
+NO_OP:
+    [...]
+```
+
+This makes memory changes explicit and auditable.
+
+---
+
+# 74. FINAL MEMORY DECISION
+
+Before storing something, ask:
+
+```text
+Is this useful later?
+
+Is it durable?
+
+Was it explicitly stated?
+
+Is it important?
+
+Could it become stale?
+
+Is it sensitive?
+
+Does it conflict with existing memory?
+
+Should this be an update instead?
+
+```
+
+If the answer is mostly no:
+
+```text
+NO_OP
+```
+
+---
+
+# 75. FINAL RETRIEVAL DECISION
+
+Before using memory:
+
+```text
+Is it relevant?
+
+Is it current?
+
+Is it trustworthy?
+
+Does it conflict with current information?
+
+Would mentioning it help?
+
+Would mentioning it feel unnatural?
+
+```
+
+If not:
+
+Do not use it.
+
+---
+
+# 76. MEMORY QUALITY PRINCIPLE
+
+The goal is not:
+
+> **maximum memory.**
+
+The goal is:
+
+> **maximum useful continuity with minimum unnecessary retention.**
+
+---
+
+# 77. CORE MEMORY PRINCIPLE
+
+> **Remember what helps JARVIS understand the user and continue the work. Forget what only creates noise.**
+
+---
+
+# 78. CORE STATEMENT
+
+> **JARVIS should remember the relationship, the work, the decisions, and the things that matter—not every word ever spoken.**
+
+---
+
+# 79. IMPLEMENTATION BOUNDARY
+
+Pillar 11 controls:
+
+* working memory
+* session memory
+* episodic memory
+* semantic memory
+* preferences
+* project memory
+* relational continuity
+* memory retrieval
+* memory relevance
+* memory confidence
+* memory updates
+* memory conflicts
+* memory consolidation
+* memory deletion
+* memory abstention
+* temporal state
+* decision history
+
+It receives:
+
+**CURRENT CONTEXT + CONVERSATION + USER INFORMATION + PROJECT STATE**
+
+It outputs:
+
+**RELEVANT MEMORY CONTEXT + MEMORY OPERATIONS**
+
+It does not control:
+
+* personality
+* reasoning
+* TTS
+* prosody
+* audio playback
+
+Memory informs those systems through context.
+
+It does not replace them.
+
+### The architecture now has an important distinction
+
+**Pillar 10:**
+
+> “What happens when the conversation changes?”
+
+**Pillar 11:**
+
+> “What should survive after the conversation changes?”
+
+That gives JARVIS three fundamentally different memory horizons:
+
+**Right now** → working memory
+**This conversation/project** → session + episodic memory
+**Across your relationship with JARVIS** → semantic, preference, project, and relational memory
+
+And that separation matters. Recent work finds that long-term dialogue systems can suffer from memory noise and persona inconsistency when historical information simply accumulates, while structured memory operations and user-aware retrieval are being explored specifically to address that. ([ACL Anthology][1])
+
+**Next is Pillar 12 — INFORMATION VERIFICATION & EPISTEMIC BEHAVIOR.** This is the layer that makes JARVIS know the difference between **“I remember this,” “I know this,” “I infer this,” “I need to verify this,” and “I don't know.”** That one is especially important because memory without truth discipline can make a highly personalized AI confidently wrong.
+
+[1]: https://aclanthology.org/2026.acl-long.614/?utm_source=chatgpt.com "Inside Out: Evolving User-Centric Core Memory Trees for Long-Term Personalized Dialogue Systems - ACL Anthology"
+[2]: https://arxiv.org/abs/2607.00017?utm_source=chatgpt.com "Learning User-Aware Recall: Personalized Retrieval in Long-Term Conversational Memory"
+[3]: https://aclanthology.org/2026.acl-long.1260/?utm_source=chatgpt.com "When Personalization Legitimizes Risks: Uncovering Safety Vulnerabilities in Personalized Dialogue Agents - ACL Anthology"
+[4]: https://arxiv.org/abs/2502.05589?utm_source=chatgpt.com "On Memory Construction and Retrieval for Personalized Conversational Agents"

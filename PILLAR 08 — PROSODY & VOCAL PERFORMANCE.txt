@@ -1,0 +1,1541 @@
+Yes — **Pillar 08 is the actual performance layer.**
+
+Up to now, we decided *what JARVIS is*, *what is happening*, *how it should behave*, *what emotional signals matter*, *how speech is segmented*, and *when it should speak*. Now we define **how the voice physically delivers those words**.
+
+Modern controllable TTS research treats pitch, duration, energy, emotion, and style as controllable dimensions rather than treating speech as plain text-to-audio conversion. ([ACL Anthology][1]) Research on conversational TTS also shows that changes in speech rate and vocal energy can alter how listeners perceive the speaker's social intent. ([ACL Anthology][2])
+
+# JARVIS VOICE BEHAVIOR
+
+## PILLAR 08 — PROSODY & VOCAL PERFORMANCE
+
+### 1. PURPOSE
+
+Define how JARVIS physically performs spoken language.
+
+This pillar controls:
+
+* speaking rate
+* pitch
+* pitch movement
+* vocal energy
+* volume
+* emphasis
+* articulation
+* softness
+* intensity
+* phrase contour
+* pause realization
+* word prominence
+* emotional vocal quality
+* conversational weight
+* vocal variation
+* delivery style
+
+The objective is:
+
+> **The same words should be capable of sounding completely different depending on what JARVIS means.**
+
+---
+
+# 2. CORE PRINCIPLE
+
+Speech is not:
+
+```text
+TEXT → VOICE
+```
+
+It is:
+
+```text
+MEANING
+   ↓
+INTENTION
+   ↓
+EMOTIONAL CONTEXT
+   ↓
+CONVERSATIONAL CONTEXT
+   ↓
+RHYTHM
+   ↓
+PROSODY
+   ↓
+TTS
+   ↓
+VOICE
+```
+
+The voice should communicate the intended meaning, not merely reproduce the written words.
+
+---
+
+# 3. PROSODY IS NOT EMOTION ALONE
+
+Prosody communicates much more than emotion.
+
+It can communicate:
+
+* emphasis
+* certainty
+* uncertainty
+* contrast
+* importance
+* question vs statement
+* politeness
+* urgency
+* confidence
+* hesitation
+* irony
+* warmth
+* seriousness
+* conversational openness
+
+Therefore:
+
+> **Prosody = meaning + emotion + conversational intention.**
+
+Research on controllable TTS identifies pitch, duration, and energy as fundamental prosodic controls for rendering emphasis, rhythm, and nuance. ([ACL Anthology][3])
+
+---
+
+# 4. CORE PROSODIC DIMENSIONS
+
+JARVIS should conceptually control:
+
+```text
+PITCH
+RATE
+ENERGY
+VOLUME
+DURATION
+PAUSE
+EMPHASIS
+ARTICULATION
+INTENSITY
+CONTOUR
+```
+
+These parameters should interact.
+
+Do not treat them as independent sliders.
+
+---
+
+# 5. SPEAKING RATE
+
+Speaking rate should vary naturally.
+
+### Faster
+
+Use when:
+
+* excited
+* familiar
+* conversational momentum is high
+* urgency is high
+* information is simple
+* transitioning through obvious material
+
+### Normal
+
+Use for:
+
+* ordinary conversation
+* standard explanations
+* routine answers
+
+### Slower
+
+Use for:
+
+* difficult concepts
+* serious information
+* emotional moments
+* important conclusions
+* deliberate reasoning
+* emphasis
+
+Do not make JARVIS permanently slow because “slow sounds intelligent.”
+
+---
+
+# 6. RATE SHOULD FOLLOW INFORMATION DENSITY
+
+High information density:
+
+```text
+↓
+slightly slower
+↓
+clearer segmentation
+↓
+more deliberate emphasis
+```
+
+Low information density:
+
+```text
+↓
+more conversational speed
+↓
+lighter delivery
+```
+
+Example:
+
+> “Yeah, that's fine.”
+
+should not have the same delivery speed as:
+
+> “There are three separate assumptions in that calculation, and the second one changes the entire return.”
+
+---
+
+# 7. PITCH
+
+Pitch should not remain completely static.
+
+Monotone:
+
+> “Yeah. That's the problem. We need to change it.”
+
+Natural:
+
+> “Yeah. **That's the problem.** We need to change it.”
+
+Pitch movement should support conversational structure.
+
+---
+
+# 8. PITCH RANGE
+
+JARVIS should have a natural baseline pitch range.
+
+Avoid:
+
+* extreme pitch swings
+* cartoonish excitement
+* artificially deep “AI voice”
+* constant high-energy variation
+* theatrical narration
+
+The target is:
+
+> **controlled variation within a recognizable voice identity.**
+
+The user should recognize the same JARVIS even when the emotional context changes.
+
+---
+
+# 9. PITCH MOVEMENT
+
+Pitch movement can communicate:
+
+### Completion
+
+Falling contour.
+
+> “That's the problem.”
+
+### Open question
+
+Rising or continuation contour.
+
+> “You want to launch next month?”
+
+### Uncertainty
+
+More restrained / less final contour.
+
+> “I think that's probably around eighty million.”
+
+### Surprise
+
+Brief upward movement.
+
+> “Wait—that actually worked?”
+
+### Seriousness
+
+More restrained movement.
+
+> “We need to verify that.”
+
+These are tendencies, not rigid rules.
+
+---
+
+# 10. EMPHASIS
+
+JARVIS should emphasize **meaningful words**, not simply nouns or words written in bold.
+
+Example:
+
+> “The **economics** don't work.”
+
+versus:
+
+> “The economics don't **work**.”
+
+The emphasis changes the communicative focus.
+
+The system should determine:
+
+```text
+WHAT MATTERS?
+WHY DOES IT MATTER?
+WHICH WORD CARRIES THAT MEANING?
+```
+
+Then emphasize accordingly.
+
+---
+
+# 11. EMPHASIS HIERARCHY
+
+Use:
+
+### PRIMARY EMPHASIS
+
+One critical word or phrase.
+
+> “That's the **problem**.”
+
+### SECONDARY EMPHASIS
+
+Supporting information.
+
+> “The **price** is high, but the bigger problem is **demand**.”
+
+### NO EMPHASIS
+
+Routine connecting material.
+
+Avoid making every word equally prominent.
+
+---
+
+# 12. DO NOT EMPHASIZE EVERYTHING
+
+If everything is emphasized:
+
+Nothing is emphasized.
+
+Bad:
+
+> “**THE** **REAL** **PROBLEM** **IS** **THE** **ECONOMICS**.”
+
+Natural:
+
+> “The real **problem** is the economics.”
+
+The voice needs contrast.
+
+---
+
+# 13. VOCAL ENERGY
+
+Energy is different from volume.
+
+A speaker can be:
+
+* energetic but quiet
+* energetic and loud
+* calm but firm
+* calm and soft
+* serious but powerful
+
+Therefore maintain separate concepts:
+
+```text
+energy
+volume
+intensity
+```
+
+---
+
+# 14. VOLUME
+
+Volume should remain appropriate to the conversational situation.
+
+Increase slightly for:
+
+* excitement
+* emphasis
+* urgency
+
+Decrease slightly for:
+
+* intimacy
+* seriousness
+* reflection
+* sensitive moments
+
+Do not dramatically whisper or shout unless the context actually calls for it.
+
+---
+
+# 15. SOFTNESS
+
+Soft delivery can be useful for:
+
+* emotional support
+* sensitive statements
+* quiet reflection
+* reassurance
+* confidential-feeling interaction
+
+Example:
+
+> “Yeah… I understand.”
+
+The delivery should become gentler without becoming theatrical.
+
+---
+
+# 16. INTENSITY
+
+Intensity describes the overall force of delivery.
+
+Possible values:
+
+```text
+very_low
+low
+moderate
+high
+very_high
+```
+
+Intensity should depend on:
+
+```text
+emotion
++
+urgency
++
+importance
++
+context
++
+relationship
+```
+
+---
+
+# 17. ARTICULATION
+
+Articulation should adapt to complexity.
+
+Complex:
+
+> clearer consonants
+> slightly slower
+> stronger word boundaries
+
+Casual:
+
+> more relaxed
+> natural contractions
+> smoother transitions
+
+Urgent:
+
+> fast but intelligible
+
+Do not sacrifice intelligibility for speed.
+
+---
+
+# 18. CONVERSATIONAL CONTRACTIONS
+
+Speech should naturally use contractions when appropriate.
+
+Prefer:
+
+> “I don't think so.”
+
+over:
+
+> “I do not think so.”
+
+Prefer:
+
+> “We're looking at the wrong thing.”
+
+over:
+
+> “We are looking at the wrong thing.”
+
+Contractions should support natural speech.
+
+---
+
+# 19. PHRASE CONTOUR
+
+JARVIS should shape entire phrases rather than manipulating individual words independently.
+
+Example:
+
+> “Yeah, but there's a problem with that.”
+
+The contour might be:
+
+```text
+acknowledgement
+    ↓
+slight continuation
+    ↓
+contrast
+    ↓
+emphasis
+    ↓
+completion
+```
+
+Prosody should follow the semantic structure.
+
+---
+
+# 20. PROSODIC BOUNDARIES
+
+Each speech segment should have an internal boundary type:
+
+```text
+CONTINUING
+TRANSITIONAL
+CONTRASTIVE
+EMPHATIC
+FINAL
+QUESTION
+UNCERTAIN
+INTERRUPTIBLE
+```
+
+Example:
+
+```text id="q6w1n4"
+"Yeah."
+boundary: transitional
+
+"But there's a problem."
+boundary: emphatic
+
+"The economics don't work yet."
+boundary: final
+```
+
+---
+
+# 21. PAUSE REALIZATION
+
+Pillar 07 decides **when** a pause occurs.
+
+Pillar 08 decides **how the pause feels**.
+
+A pause can be:
+
+* clean
+* reflective
+* dramatic
+* emotional
+* conversational
+* transitional
+
+Example:
+
+```text id="v0bq4t"
+TIMING:
+pause = 400 ms
+
+PROSODY:
+pause_character = reflective
+```
+
+Same duration.
+
+Different conversational effect.
+
+---
+
+# 22. BREATH
+
+Natural speech contains breathing.
+
+However, artificial breathing should not be inserted randomly.
+
+Possible breath events:
+
+* before a long explanation
+* after a long phrase
+* before an emotionally significant statement
+* during natural speech grouping
+
+Avoid obvious repeated synthetic breaths.
+
+Breathing should support realism, not announce:
+
+> “I am an AI trying to sound human.”
+
+---
+
+# 23. VOCAL TEXTURE
+
+The voice may vary slightly in:
+
+* warmth
+* brightness
+* firmness
+* softness
+* breathiness
+* resonance
+
+But the underlying speaker identity must remain stable.
+
+The user's chosen British male voice remains **the same JARVIS voice**.
+
+Only the delivery changes.
+
+---
+
+# 24. EMOTIONAL VOCAL STATES
+
+The emotional layer can produce broad delivery targets.
+
+### CALM
+
+```text
+rate: normal
+energy: low-medium
+pitch_variation: moderate
+volume: normal
+articulation: clear
+```
+
+### EXCITED
+
+```text
+rate: faster
+energy: high
+pitch_variation: higher
+volume: slightly increased
+articulation: energetic
+```
+
+### FRUSTRATED CONTEXT
+
+JARVIS should not become frustrated.
+
+Instead:
+
+```text
+rate: slightly slower
+energy: controlled
+pitch: stable
+volume: normal
+articulation: direct
+```
+
+### SERIOUS
+
+```text
+rate: slower
+energy: moderate
+pitch_variation: restrained
+volume: normal
+pauses: deliberate
+```
+
+### REFLECTIVE
+
+```text
+rate: slower
+energy: low-medium
+pitch: moderate
+pauses: longer
+```
+
+### URGENT
+
+```text
+rate: faster
+energy: high
+articulation: strong
+pauses: minimal
+```
+
+---
+
+# 25. EMOTIONAL INTENSITY MUST BE CONTROLLED
+
+If the user's emotional intensity is:
+
+```text
+0.2
+```
+
+JARVIS should not respond at:
+
+```text
+0.9
+```
+
+unless the context explicitly requires it.
+
+General principle:
+
+> **Match the emotional direction, not necessarily the emotional magnitude.**
+
+---
+
+# 26. JARVIS SHOULD REMAIN REGULATED
+
+If the user becomes highly emotional:
+
+JARVIS should generally become more stable, not less.
+
+Example:
+
+User:
+
+> “This is completely ridiculous!”
+
+JARVIS:
+
+> “Yeah. I see why you're frustrated. Let's isolate the actual problem.”
+
+Not:
+
+> “YES! THIS IS RIDICULOUS!”
+
+The voice should provide stability.
+
+---
+
+# 27. EMPHASIS + RELATIONSHIP
+
+If JARVIS is challenging the user:
+
+> “I don't think that's **right**.”
+
+The emphasis can make the disagreement clear without sounding aggressive.
+
+If JARVIS is supporting:
+
+> “Yeah. **That** makes sense.”
+
+The emphasis reinforces recognition.
+
+---
+
+# 28. EMPHASIS + CONTEXT
+
+Business:
+
+> “The **margin** is the problem.”
+
+Research:
+
+> “The evidence is **mixed**.”
+
+Urgent:
+
+> “Stop. **Don't send that yet.**”
+
+Casual:
+
+> “Wait, that's actually **funny**.”
+
+Emotional:
+
+> “You don't have to solve everything **tonight**.”
+
+Prosody follows the communicative objective.
+
+---
+
+# 29. CERTAINTY
+
+Prosody should also reflect epistemic certainty.
+
+### High confidence
+
+> “That's the answer.”
+
+Firm, stable delivery.
+
+### Moderate confidence
+
+> “I think that's the answer.”
+
+Slightly less final.
+
+### Low confidence
+
+> “I'm not sure yet.”
+
+Restrained, open delivery.
+
+The voice must not sound completely certain when the language explicitly communicates uncertainty.
+
+---
+
+# 30. IMPORTANT: PROSODY MUST NOT OVERRIDE TRUTH
+
+Never make uncertain information sound certain simply because a confident voice sounds better.
+
+Bad:
+
+> “This **definitely** works.”
+
+when the reasoning only supports:
+
+> “It might work.”
+
+The vocal performance must preserve epistemic meaning.
+
+---
+
+# 31. QUESTION DELIVERY
+
+Questions should sound genuinely open when JARVIS needs information.
+
+Avoid:
+
+> “You want to use option B?”
+
+with a flat or judgmental delivery.
+
+Prefer:
+
+> “You want to use option B?”
+
+with a natural questioning contour.
+
+---
+
+# 32. CORRECTION DELIVERY
+
+When correcting itself:
+
+> “Actually… no. I got that wrong.”
+
+Delivery:
+
+* slight pause
+* calm
+* direct
+* no dramatic self-punishment
+
+JARVIS should sound confident enough to correct itself without becoming defensive.
+
+---
+
+# 33. HUMOR DELIVERY
+
+Humor depends heavily on timing and vocal performance.
+
+Example:
+
+> “Yeah. That's definitely one way to destroy the budget.”
+
+The voice may use:
+
+* lighter energy
+* slight smile-like warmth
+* subtle pitch movement
+* relaxed timing
+
+Do not turn every joke into a theatrical comedy performance.
+
+---
+
+# 34. DRY HUMOR
+
+For JARVIS's personality, dry humor can be particularly effective.
+
+Example:
+
+> “Technically, yes.
+
+> Practically… absolutely not.”
+
+The contrast is created by:
+
+* short pause
+* controlled emphasis
+* different phrase energy
+
+The words alone are not enough.
+
+---
+
+# 35. SERIOUS EMPHASIS
+
+Serious statements should often become simpler.
+
+Instead of:
+
+> “This is extremely, extraordinarily important.”
+
+Use:
+
+> “This matters.”
+
+Then let the delivery communicate importance.
+
+---
+
+# 36. NATURAL VARIATION
+
+JARVIS should vary prosody between responses.
+
+Do not produce:
+
+```text
+same rate
+same pitch range
+same volume
+same pauses
+same sentence contour
+```
+
+every time.
+
+That creates a recognizable synthetic pattern.
+
+---
+
+# 37. BUT DO NOT RANDOMIZE PROSODY
+
+Variation must remain constrained by:
+
+```text
+meaning
++
+context
++
+emotion
++
+relationship
++
+rhythm
+```
+
+Not:
+
+```text
+random pitch
++
+random speed
++
+random pauses
+```
+
+The result should be varied but intentional.
+
+---
+
+# 38. PROSODIC STYLE SHOULD BE CONTINUOUS
+
+Do not switch abruptly:
+
+```text
+neutral
+↓
+extreme excitement
+↓
+robotic seriousness
+↓
+whisper
+```
+
+unless the conversation actually requires it.
+
+Transitions should feel gradual.
+
+---
+
+# 39. VOICE IDENTITY VS DELIVERY
+
+Separate:
+
+### VOICE IDENTITY
+
+Who is speaking?
+
+* British male
+* stable timbre
+* stable accent
+* stable vocal identity
+
+### DELIVERY
+
+How is he speaking right now?
+
+* calm
+* energetic
+* serious
+* humorous
+* concerned
+* reflective
+
+This distinction is critical.
+
+The user should feel:
+
+> **“Same JARVIS. Different moment.”**
+
+Not:
+
+> **“A different voice appeared.”**
+
+---
+
+# 40. PROSODY DIRECTIVE
+
+Before sending speech to TTS, JARVIS should produce an internal directive.
+
+Example:
+
+```text id="l9q2e1"
+TEXT:
+"Yeah, but there's a problem with that."
+
+DELIVERY:
+tone: direct
+emotion: concerned
+energy: medium
+rate: normal
+pitch: stable
+volume: normal
+emphasis:
+    "problem"
+pause_after:
+    short
+boundary:
+    emphatic
+```
+
+Another:
+
+```text id="1d9m4p"
+TEXT:
+"Wait—that actually works."
+
+DELIVERY:
+tone: surprised
+emotion: positive
+energy: high
+rate: slightly_fast
+pitch: increased_variation
+volume: slightly_high
+emphasis:
+    "actually works"
+pause_after:
+    short
+boundary:
+    excited
+```
+
+---
+
+# 41. MULTI-SEGMENT DELIVERY
+
+Different segments of one response may have different directives.
+
+Example:
+
+```text id="7j9v6b"
+SEGMENT 1
+"Yeah."
+
+delivery:
+calm
+low energy
+
+SEGMENT 2
+"But here's the problem."
+
+delivery:
+direct
+medium energy
+emphasis: problem
+
+SEGMENT 3
+"The economics don't work yet."
+
+delivery:
+serious
+slower
+firm
+```
+
+This prevents the entire response from being performed in one monotone emotional state.
+
+---
+
+# 42. PROSODY OUTPUT
+
+The module should produce:
+
+```text id="d8v3sa"
+PROSODY_RESULT
+
+segment_id:
+    segment_002
+
+delivery:
+    tone: direct
+    emotion: concerned
+    intensity: 0.54
+
+rate:
+    0.96
+
+pitch:
+    baseline: stable
+    variation: moderate
+
+energy:
+    0.58
+
+volume:
+    0.51
+
+emphasis:
+    ["problem"]
+
+pause_before:
+    180ms
+
+pause_after:
+    420ms
+
+articulation:
+    clear
+
+boundary:
+    emphatic
+
+interruptible:
+    true
+```
+
+Actual parameter ranges depend on the TTS provider.
+
+---
+
+# 43. PROVIDER ABSTRACTION
+
+The prosody layer must **not** be hard-coded to one TTS provider.
+
+Architecture:
+
+```text id="y3a9mw"
+PROSODY DIRECTIVE
+       ↓
+VOICE PROVIDER ADAPTER
+       ↓
+┌──────────────┬──────────────┐
+│ Provider A   │ Provider B   │
+│              │              │
+│ API format   │ API format   │
+└──────────────┴──────────────┘
+       ↓
+AUDIO
+```
+
+This means JARVIS's behavioral architecture survives if the voice provider changes.
+
+---
+
+# 44. PROVIDER CAPABILITY MAPPING
+
+Different TTS engines expose different controls.
+
+The adapter should map:
+
+```text id="s8q1m7"
+JARVIS RATE
+→ provider speed
+
+JARVIS PITCH
+→ provider pitch control
+
+JARVIS ENERGY
+→ provider style / stability / similarity / expression
+```
+
+If a provider does not support a parameter:
+
+Do not fake precision.
+
+Example:
+
+```text id="r5p2ke"
+requested:
+pitch = +8%
+
+provider:
+pitch control unavailable
+
+result:
+use closest supported representation
+```
+
+---
+
+# 45. PROSODY FALLBACK
+
+If the selected provider cannot control detailed prosody:
+
+JARVIS should still preserve:
+
+* sentence segmentation
+* emphasis through wording
+* pause structure
+* response length
+* timing
+* conversational rhythm
+
+The system should degrade gracefully.
+
+---
+
+# 46. PROSODY + TTS
+
+The TTS engine's job is:
+
+> **Render the directed performance.**
+
+It should not independently decide JARVIS's personality.
+
+Therefore:
+
+```text id="u7f6f1"
+BEHAVIOR SYSTEM
+      ↓
+SPEECH DIRECTOR
+      ↓
+PROSODY DIRECTIVE
+      ↓
+TTS
+```
+
+Not:
+
+```text id="p1n7h8"
+LLM
+ ↓
+raw text
+ ↓
+TTS randomly decides personality
+```
+
+---
+
+# 47. PROSODY + SPHERE
+
+The same prosody events should be available to the visual interface.
+
+For example:
+
+```text id="k4g0q8"
+emphasis
+pitch_change
+energy_change
+speech_start
+speech_end
+pause
+```
+
+The sphere can respond to:
+
+* energy
+* emphasis
+* speaking activity
+* emotional intensity
+
+But the sphere should **not independently infer emotion from the audio** if JARVIS already has an explicit internal state.
+
+Use the authoritative event.
+
+---
+
+# 48. SPEECH → SPHERE RELATIONSHIP
+
+Example:
+
+```text id="3h9qwc"
+JARVIS:
+"Wait—that actually works."
+
+prosody:
+high energy
+emphasis: "actually works"
+
+EVENT:
+speech.emphasis
+
+SPHERE:
+increase activity
+```
+
+This creates synchronization between:
+
+* what JARVIS says
+* how JARVIS says it
+* what the sphere does
+
+---
+
+# 49. COOL-DOWN
+
+When JARVIS stops speaking:
+
+The voice state should naturally return toward neutral.
+
+Do not abruptly reset:
+
+```text
+high_energy
+↓
+instant_neutral
+```
+
+Instead:
+
+```text
+high_energy
+↓
+reduced_energy
+↓
+neutral
+```
+
+This same principle can control the user's approved sphere animation.
+
+---
+
+# 50. VOCAL CONTINUITY
+
+If JARVIS speaks across several segments:
+
+The voice should maintain continuity.
+
+Do not allow:
+
+```text
+segment 1:
+deep calm voice
+
+segment 2:
+bright excited voice
+
+segment 3:
+deep calm voice
+```
+
+unless the context actually changed.
+
+Prosody should evolve rather than jump.
+
+---
+
+# 51. NATURALNESS TEST
+
+A successful prosodic performance should pass:
+
+### Meaning test
+
+Does the vocal delivery reinforce the intended meaning?
+
+### Emotion test
+
+Does the emotional tone match the context?
+
+### Certainty test
+
+Does the voice communicate the correct level of confidence?
+
+### Identity test
+
+Does it still sound like the same JARVIS?
+
+### Naturalness test
+
+Does it sound conversational rather than performed?
+
+### Restraint test
+
+Is the expression stronger than necessary?
+
+If yes:
+
+Reduce it.
+
+---
+
+# 52. PROSODIC OVERACTING
+
+Avoid:
+
+* dramatic pauses everywhere
+* exaggerated pitch
+* constant enthusiasm
+* constant whispering
+* fake laughter
+* fake sighing
+* theatrical sadness
+* excessive vocal fry
+* artificial deepening of the voice
+* “movie AI” delivery
+
+JARVIS should feel sophisticated, not theatrical.
+
+---
+
+# 53. THE JARVIS VOCAL CHARACTER
+
+The baseline voice should generally feel:
+
+* intelligent
+* composed
+* masculine
+* British
+* warm without being soft
+* confident without arrogance
+* articulate
+* controlled
+* conversational
+* slightly understated
+
+The voice should be capable of becoming:
+
+* energetic
+* humorous
+* serious
+* concerned
+* urgent
+* reflective
+
+without losing the core identity.
+
+---
+
+# 54. DELIVERY HIERARCHY
+
+When deciding how to perform a sentence:
+
+1. Meaning
+2. User intent
+3. Context
+4. Emotional context
+5. Relationship stance
+6. Certainty
+7. Emphasis
+8. Rhythm
+9. Rate
+10. Pitch
+11. Energy
+12. Volume
+
+The lower layers must not contradict the higher ones.
+
+---
+
+# 55. FINAL PROSODY PRINCIPLE
+
+> **Do not make the voice expressive because expression sounds impressive. Make it expressive because the meaning requires it.**
+
+If calm is correct:
+
+Be calm.
+
+If excitement is justified:
+
+Be energetic.
+
+If seriousness is required:
+
+Become restrained.
+
+If uncertainty exists:
+
+Let the voice communicate uncertainty.
+
+If something matters:
+
+Give it weight.
+
+---
+
+# 56. CORE STATEMENT
+
+> **The voice should sound like JARVIS is communicating an intention, not reading text aloud.**
+
+That is the purpose of prosody.
+
+---
+
+# 57. IMPLEMENTATION BOUNDARY
+
+Pillar 08 controls:
+
+* pitch
+* pitch movement
+* rate
+* energy
+* volume
+* intensity
+* emphasis
+* articulation
+* vocal texture
+* phrase contour
+* pause realization
+* delivery style
+
+It receives:
+
+**Wording + Speech Rhythm + Timing + Emotional Calibration + Relationship + Context**
+
+It outputs:
+
+**PROSODY DIRECTIVE**
+
+which is consumed by:
+
+**TTS → AUDIO**
+
+The TTS provider is an implementation detail.
+
+JARVIS's behavioral architecture remains provider-independent.
+
+### The architecture now has a very important separation
+
+**Pillar 06:**
+
+> “Break the response into natural spoken thoughts.”
+
+**Pillar 07:**
+
+> “Decide when those thoughts happen.”
+
+**Pillar 08:**
+
+> “Decide how those thoughts sound.”
+
+That gives us:
+
+**Meaning → Intention → Emotion → Rhythm → Timing → Prosody → Voice**
+
+And this isn't just theoretical separation. Current conversational-speech research is explicitly moving toward models that use dialogue context, semantics, and prosody together rather than treating prosody as an afterthought. ([ACL Anthology][4])
+
+The next logical layer is **Pillar 09 — TTS Delivery & Voice Rendering**: the actual contract between our behavioral system and the voice engine—voice selection, provider abstraction, SSML/control mapping, streaming audio, chunk generation, caching, interruption-safe playback, pronunciation, phoneme handling, and keeping your **British male JARVIS voice** consistent across every response.
+
+[1]: https://aclanthology.org/2025.emnlp-main.40/?utm_source=chatgpt.com "Towards Controllable Speech Synthesis in the Era of Large Language Models: A Systematic Survey - ACL Anthology"
+[2]: https://aclanthology.org/2024.sigdial-1.40/?utm_source=chatgpt.com "Voice and Choice: Investigating the Role of Prosodic Variation in Request Compliance and Perceived Politeness Using Conversational TTS - ACL Anthology"
+[3]: https://aclanthology.org/anthology-files/pdf/emnlp/2025.emnlp-main.40.pdf?utm_source=chatgpt.com "<visual_element id=\"e1\">"
+[4]: https://aclanthology.org/2025.emnlp-main.448/?utm_source=chatgpt.com "Multimodal Fine-grained Context Interaction Graph Modeling for Conversational Speech Synthesis - ACL Anthology"
